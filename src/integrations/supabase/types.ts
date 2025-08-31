@@ -14,7 +14,217 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_completions: {
+        Row: {
+          completed_at: string | null
+          completion_date: string
+          created_at: string
+          id: string
+          notes: string | null
+          routine_template_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_date: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          routine_template_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_date?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          routine_template_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_completions_routine_template_id_fkey"
+            columns: ["routine_template_id"]
+            isOneToOne: false
+            referencedRelation: "routine_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habit_completions: {
+        Row: {
+          completed_at: string | null
+          completion_date: string
+          created_at: string
+          habit_id: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_date: string
+          created_at?: string
+          habit_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_date?: string
+          created_at?: string
+          habit_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_completions_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          target_frequency: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          target_frequency?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          target_frequency?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mood_entries: {
+        Row: {
+          created_at: string
+          entry_date: string
+          id: string
+          mood_level: Database["public"]["Enums"]["mood_level"]
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_date: string
+          id?: string
+          mood_level: Database["public"]["Enums"]["mood_level"]
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood_level?: Database["public"]["Enums"]["mood_level"]
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      routine_templates: {
+        Row: {
+          category: Database["public"]["Enums"]["task_category"]
+          created_at: string
+          day_of_week: Database["public"]["Enums"]["day_of_week"]
+          description: string | null
+          estimated_minutes: number | null
+          id: string
+          is_active: boolean | null
+          sort_order: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["task_category"]
+          created_at?: string
+          day_of_week: Database["public"]["Enums"]["day_of_week"]
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["task_category"]
+          created_at?: string
+          day_of_week?: Database["public"]["Enums"]["day_of_week"]
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +233,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      day_of_week:
+        | "monday"
+        | "tuesday"
+        | "wednesday"
+        | "thursday"
+        | "friday"
+        | "saturday"
+        | "sunday"
+      mood_level: "very_bad" | "bad" | "neutral" | "good" | "very_good"
+      task_category: "morning" | "evening" | "daily"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +369,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      day_of_week: [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+      ],
+      mood_level: ["very_bad", "bad", "neutral", "good", "very_good"],
+      task_category: ["morning", "evening", "daily"],
+    },
   },
 } as const
