@@ -3,88 +3,112 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useToast } from "@/hooks/use-toast";
-import type { Habit, HabitCompletions } from "@/types/lifeo";
+import { useHabits } from "@/hooks/useSupabaseData";
 import { todayKey } from "@/utils/date";
 
 export default function Habits() {
   const { toast } = useToast();
-  const [habits, setHabits] = useLocalStorage<Habit[]>("lifeo.habits", []);
-  const [completions, setCompletions] = useLocalStorage<HabitCompletions>("lifeo.habitCompletions", {});
+  const { habits, completions, addHabit, removeHabit, toggleHabitCompletion } = useHabits();
   const [title, setTitle] = useState("");
   const today = todayKey();
 
-  function addHabit() {
+  async function handleAddHabit() {
     if (!title.trim()) return;
-    const h: Habit = { id: `${Date.now()}`, title: title.trim(), active: true };
-    setHabits(prev => [...prev, h]);
+    await addHabit(title.trim());
     setTitle("");
-    toast({ title: "Habit added" });
+    toast({ title: "Habit added", description: "Your new habit has been added successfully!" });
   }
-  function toggleToday(id: string) {
-    setCompletions(prev => {
-      const day = prev[today] || [];
-      const isDone = day.includes(id);
-      const next = isDone ? day.filter(x=>x!==id) : [...day, id];
-      return { ...prev, [today]: next };
-    });
-  }
+
   const doneToday = completions[today] || [];
 
   const streaks = useMemo(() => {
-    // simple streak: count consecutive days present in completions moving backwards
+    // Simple streak: count consecutive days present in completions moving backwards
     const result: Record<string, number> = {};
     for (const h of habits) {
       let streak = 0;
       for (let i=0; i<365; i++) {
-        const d = new Date(); d.setDate(d.getDate()-i);
+        const d = new Date(); 
+        d.setDate(d.getDate()-i);
         const key = todayKey(d);
         const arr = completions[key] || [];
-        if (arr.includes(h.id)) streak++; else break;
+        if (arr.includes(h.id)) streak++; 
+        else break;
       }
       result[h.id] = streak;
     }
     return result;
   }, [habits, completions]);
 
-  function removeHabit(id: string) {
-    setHabits(prev => prev.filter(h=>h.id!==id));
-  }
-
   return (
-    <section aria-labelledby="habits-title" className="space-y-4">
+    <section aria-labelledby="habits-title" className="space-y-4 animate-fade-in">
       <h1 id="habits-title" className="text-3xl font-semibold">Habits</h1>
-      <Card>
+      
+      <Card className="card-glow">
         <CardHeader>
-          <CardTitle>Add habit</CardTitle>
+          <CardTitle>Add New Habit</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-2">
-          <Input placeholder="e.g., Read 10 minutes" value={title} onChange={e=>setTitle(e.target.value)}
-            onKeyDown={(e)=>{ if(e.key==='Enter') addHabit(); }} />
-          <Button onClick={addHabit}>Add</Button>
+          <Input 
+            placeholder="e.g., Read 10 minutes, Exercise, Meditate" 
+            value={title} 
+            onChange={e=>setTitle(e.target.value)}
+            onKeyDown={(e)=>{ if(e.key==='Enter') handleAddHabit(); }} 
+          />
+          <Button onClick={handleAddHabit}>Add</Button>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="card-glow">
         <CardHeader>
-          <CardTitle>Today's habits</CardTitle>
+          <CardTitle>Today's Habits</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {habits.map(h => (
-              <li key={h.id} className="flex items-center justify-between p-3 rounded-md bg-card card-glow">
+              <li key={h.id} className="flex items-center justify-between p-4 rounded-lg bg-card card-glow animate-slide-up">
                 <div className="flex items-center gap-3">
-                  <Checkbox checked={doneToday.includes(h.id)} onCheckedChange={()=>toggleToday(h.id)} />
-                  <span>{h.title}</span>
+                  <Checkbox 
+                    checked={doneToday.includes(h.id)} 
+                    onCheckedChange={()=>toggleHabitCompletion(h.id, today)} 
+                  />
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{h.icon}</span>
+                    <span className={doneToday.includes(h.id) ? "line-through text-muted-foreground" : ""}>
+                      {h.title}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Streak: {streaks[h.id] || 0}</span>
-                  <Button variant="secondary" onClick={()=>removeHabit(h.id)}>Remove</Button>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-primary">
+                      {streaks[h.id] || 0} day streak
+                    </div>
+                    {streaks[h.id] > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        Keep it up! 🔥
+                      </div>
+                    )}
+                  </div>
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={()=>removeHabit(h.id)}
+                    className="hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    Remove
+                  </Button>
                 </div>
               </li>
             ))}
-            {habits.length===0 && <p className="text-sm text-muted-foreground">No habits yet.</p>}
+            {habits.length===0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-2">No habits yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Start building better habits by adding your first one above! 🎯
+                </p>
+              </div>
+            )}
           </ul>
         </CardContent>
       </Card>
