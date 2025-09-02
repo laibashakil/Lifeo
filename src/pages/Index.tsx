@@ -4,11 +4,13 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useRoutines, useHabits, useMoods } from "@/hooks/useSupabaseData";
+import { useDummyData } from "@/hooks/useDummyData";
 import { todayKey, weekdayKey } from "@/utils/date";
 import type { DayKey } from "@/types/lifeo";
 import { Link } from "react-router-dom";
 
 const Index = () => {
+  useDummyData(); // Initialize dummy data
   const { routines, completions, toggleCompletion } = useRoutines();
   const { habits, completions: habitCompletions, toggleHabitCompletion } = useHabits();
   const { moods, setMood } = useMoods();

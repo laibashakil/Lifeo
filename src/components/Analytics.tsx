@@ -4,10 +4,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 import { Calendar, TrendingUp, Target, Smile } from "lucide-react";
 import { useRoutines, useHabits, useMoods } from "@/hooks/useSupabaseData";
+import MoodGrid from "@/components/MoodGrid";
+import { useDummyData } from "@/hooks/useDummyData";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--energy))', 'hsl(var(--inspiration))', 'hsl(var(--wellness))'];
 
 export default function Analytics() {
+  useDummyData(); // Initialize dummy data
   const { routines, completions } = useRoutines();
   const { habits, completions: habitCompletions } = useHabits();
   const { moods } = useMoods();
@@ -263,11 +266,14 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Mood Trends */}
+      {/* Mood Grid */}
+      <MoodGrid />
+
+      {/* Mood Trends Chart */}
       {Object.keys(moods).length > 0 && (
         <Card className="card-glow">
           <CardHeader>
-            <CardTitle>Mood Trends</CardTitle>
+            <CardTitle>Mood Trends Over Time</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
