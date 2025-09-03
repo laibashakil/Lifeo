@@ -3,13 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useMoodTheme } from "@/hooks/useMoodTheme";
 import { DownloadIcon, UploadIcon, Palette, Shield, Database } from "lucide-react";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
+  const { currentTheme, setTheme, themes } = useMoodTheme();
   const { toast } = useToast();
   const [darkMode, setDarkMode] = useState(false);
 
@@ -49,6 +53,39 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
                 </div>
                 <Switch id="dark-mode" checked={darkMode} onCheckedChange={setDarkMode} />
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Label>Mood Grid Theme</Label>
+                  <InfoTooltip content="Choose how mood colors appear in your calendar grid" />
+                </div>
+                <Select value={currentTheme.name} onValueChange={setTheme}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {themes.map((theme) => (
+                      <SelectItem key={theme.name} value={theme.name}>
+                        <div className="flex items-center gap-3">
+                          <div className="flex gap-0">
+                            {theme.colors.map((color, index) => (
+                              <div
+                                key={index}
+                                className="w-3 h-3 border-0"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                          <span>{theme.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  Preview how different color themes look in your mood calendar
+                </p>
               </div>
             </CardContent>
           </Card>

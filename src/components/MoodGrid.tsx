@@ -2,21 +2,16 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useMoods } from "@/hooks/useSupabaseData";
+import { useMoodTheme } from "@/hooks/useMoodTheme";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type TimeRange = "month" | "quarter" | "year";
 
-const moodColors = [
-  'hsl(0 65% 75%)',     // Very bad - soft red
-  'hsl(25 65% 75%)',    // Bad - soft orange  
-  'hsl(45 45% 75%)',    // Neutral - soft yellow
-  'hsl(85 50% 75%)',    // Good - soft green
-  'hsl(142 45% 70%)',   // Very good - bright green
-];
-
 export default function MoodGrid() {
   const { moods } = useMoods();
+  const { currentTheme } = useMoodTheme();
   const [timeRange, setTimeRange] = useState<TimeRange>("month");
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -138,7 +133,10 @@ export default function MoodGrid() {
     <Card className="card-glow">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Mood Calendar</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>Mood Calendar</CardTitle>
+            <InfoTooltip content="You can change the color theme of the grid in the settings!" />
+          </div>
           <div className="flex items-center gap-3">
             <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
               <SelectTrigger className="w-28">
@@ -176,20 +174,20 @@ export default function MoodGrid() {
         )}
 
         {/* Mood Grid */}
-        <div className={`grid ${getGridCols()} gap-1`}>
+        <div className={`inline-grid ${getGridCols()}`}>
           {gridData.map(({ date, mood, isToday, dayOfMonth }, index) => (
             <div
               key={date}
               className={`
-                ${getSquareSize()} rounded-sm border-2 transition-all duration-200 cursor-pointer
+                ${getSquareSize()} transition-all duration-200 cursor-pointer border-0
                 ${isToday ? 'ring-2 ring-primary ring-offset-1' : ''}
                 ${mood !== undefined 
-                  ? 'border-transparent hover:scale-110' 
-                  : 'border-muted hover:border-muted-foreground/50'
+                  ? 'hover:scale-110 hover:z-10 relative' 
+                  : 'hover:opacity-70'
                 }
               `}
               style={{
-                backgroundColor: mood !== undefined ? moodColors[mood] : 'hsl(var(--muted))'
+                backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'hsl(var(--muted))'
               }}
               title={`${date}${mood !== undefined ? ` - Mood: ${['😞','🙁','😐','🙂','😄'][mood]}` : ' - No mood recorded'}`}
             >
@@ -206,11 +204,11 @@ export default function MoodGrid() {
         <div className="flex items-center justify-between pt-4 border-t">
           <div className="flex items-center gap-4 text-xs">
             <span className="text-muted-foreground">Less</span>
-            <div className="flex gap-1">
-              {moodColors.map((color, index) => (
+            <div className="flex gap-0">
+              {currentTheme.colors.map((color, index) => (
                 <div
                   key={index}
-                  className="w-3 h-3 rounded-sm border"
+                  className="w-3 h-3 border-0"
                   style={{ backgroundColor: color }}
                   title={['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][index]}
                 />
@@ -221,7 +219,7 @@ export default function MoodGrid() {
           
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-sm bg-muted border" />
+              <div className="w-3 h-3 bg-muted border-0" />
               <span>No data</span>
             </div>
           </div>
