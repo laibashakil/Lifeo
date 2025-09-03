@@ -100,8 +100,8 @@ export function useDummyData() {
           const habitCompletions = [];
           const moodEntries = [];
 
-          // Generate 60 days of historical data
-          for (let i = 60; i >= 0; i--) {
+          // Generate 365 days of historical data (full year)
+          for (let i = 365; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
             const dateKey = date.toISOString().split('T')[0];

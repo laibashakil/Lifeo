@@ -16,6 +16,15 @@
     --success-foreground: 0 0% 100%;
     --growth: 130 40% 68%; /* Fresh green - development */
     --growth-foreground: 0 0% 100%;
+    
+    /* Routine specific colors - different green shades */
+    --routine-morning: 150 50% 72%; /* Fresh morning green */
+    --routine-daily: 135 45% 68%; /* Balanced day green */
+    --routine-evening: 120 42% 65%; /* Calm evening green */
+    
+    /* Habit specific colors - warmer greens */
+    --habit-primary: 85 48% 68%; /* Warm lime green */
+    --habit-secondary: 95 45% 70%; /* Yellow-green mix */
 
     /* Energy & motivation colors */
     --energy: 85 50% 75%; /* Soft lime - energy */

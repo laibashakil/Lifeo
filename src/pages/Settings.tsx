@@ -9,11 +9,13 @@ import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useMoodTheme } from "@/hooks/useMoodTheme";
-import { DownloadIcon, UploadIcon, Palette, Shield, Database } from "lucide-react";
+import { useAnalyticsSettings } from "@/hooks/useAnalyticsSettings";
+import { DownloadIcon, UploadIcon, Palette, Shield, Database, BarChart3 } from "lucide-react";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
   const { currentTheme, setTheme, themes } = useMoodTheme();
+  const { settings, toggleCard, updateSetting } = useAnalyticsSettings();
   const { toast } = useToast();
   const [darkMode, setDarkMode] = useState(false);
 
@@ -30,6 +32,10 @@ export default function Settings() {
           <TabsTrigger value="preferences" className="gap-2">
             <Palette className="h-4 w-4" />
             Preferences
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
           </TabsTrigger>
           <TabsTrigger value="data" className="gap-2">
             <Database className="h-4 w-4" />
@@ -86,6 +92,64 @@ export default function Settings() {
                 <p className="text-sm text-muted-foreground">
                   Preview how different color themes look in your mood calendar
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <Card className="card-glow">
+            <CardHeader>
+              <CardTitle>Analytics Dashboard</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="font-medium mb-4">Visible Cards</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {[
+                    { id: "overview-stats", name: "Overview Statistics" },
+                    { id: "progress-over-time", name: "Progress Over Time" },
+                    { id: "category-performance", name: "Category Performance" },
+                    { id: "habit-streaks", name: "Habit Streaks" },
+                    { id: "mood-grid", name: "Mood Calendar Grid" },
+                    { id: "mood-trends", name: "Mood Trends Chart" }
+                  ].map(card => (
+                    <div key={card.id} className="flex items-center justify-between">
+                      <Label htmlFor={card.id}>{card.name}</Label>
+                      <Switch 
+                        id={card.id}
+                        checked={settings.visibleCards.includes(card.id as any)}
+                        onCheckedChange={() => toggleCard(card.id as any)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="combine-categories">Combine Task Categories</Label>
+                    <p className="text-sm text-muted-foreground">Show morning, daily, and evening tasks together</p>
+                  </div>
+                  <Switch 
+                    id="combine-categories"
+                    checked={settings.combineTaskCategories}
+                    onCheckedChange={(checked) => updateSetting('combineTaskCategories', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="combine-habits">Combine with Habits</Label>
+                    <p className="text-sm text-muted-foreground">Show tasks and habits in the same checklist</p>
+                  </div>
+                  <Switch 
+                    id="combine-habits"
+                    checked={settings.combineWithHabits}
+                    onCheckedChange={(checked) => updateSetting('combineWithHabits', checked)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

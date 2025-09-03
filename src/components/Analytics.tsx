@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
-import { Calendar, TrendingUp, Target, Smile } from "lucide-react";
+import { Calendar, TrendingUp, Target, Smile, X } from "lucide-react";
 import { useRoutines, useHabits, useMoods } from "@/hooks/useSupabaseData";
 import MoodGrid from "@/components/MoodGrid";
 import { useDummyData } from "@/hooks/useDummyData";
+import { useAnalyticsSettings } from "@/hooks/useAnalyticsSettings";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--energy))', 'hsl(var(--inspiration))', 'hsl(var(--wellness))'];
 
@@ -15,6 +17,7 @@ export default function Analytics() {
   const { habits, completions: habitCompletions } = useHabits();
   const { moods } = useMoods();
   const [timeRange, setTimeRange] = useState<"7" | "30" | "90">("30");
+  const { isVisible, removeCard } = useAnalyticsSettings();
 
   // Generate date range
   const dateRange = useMemo(() => {
@@ -129,100 +132,93 @@ export default function Analytics() {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="card-glow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-primary/10">
-                <Target className="h-5 w-5 text-primary" />
+      {isVisible("overview-stats") && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="card-glow relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-destructive/20"
+              onClick={() => removeCard("overview-stats")}
+            >
+              <X className="h-3 w-3 text-destructive" />
+            </Button>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-primary/10">
+                  <Target className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Avg Routine</p>
+                  <p className="text-2xl font-semibold">{averageStats.routine}%</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Avg Routine</p>
-                <p className="text-2xl font-semibold">{averageStats.routine}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="card-glow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-success/10">
-                <TrendingUp className="h-5 w-5 text-success" />
+          <Card className="card-glow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-habit-primary/10">
+                  <TrendingUp className="h-5 w-5 text-habit-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Avg Habits</p>
+                  <p className="text-2xl font-semibold">{averageStats.habit}%</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Avg Habits</p>
-                <p className="text-2xl font-semibold">{averageStats.habit}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="card-glow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-energy/10">
-                <Smile className="h-5 w-5 text-energy" />
+          <Card className="card-glow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-energy/10">
+                  <Smile className="h-5 w-5 text-energy" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Avg Mood</p>
+                  <p className="text-2xl font-semibold">{averageStats.mood}/5</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Avg Mood</p>
-                <p className="text-2xl font-semibold">{averageStats.mood}/5</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="card-glow">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-inspiration/10">
-                <Calendar className="h-5 w-5 text-inspiration" />
+          <Card className="card-glow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-inspiration/10">
+                  <Calendar className="h-5 w-5 text-inspiration" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Days Tracked</p>
+                  <p className="text-2xl font-semibold">{timeRange}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Days Tracked</p>
-                <p className="text-2xl font-semibold">{timeRange}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Progress Over Time */}
-      <Card className="card-glow">
-        <CardHeader>
-          <CardTitle>Progress Over Time</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={dailyData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="dateFormatted" />
-              <YAxis />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }}
-              />
-              <Line type="monotone" dataKey="routineCompletion" stroke="hsl(var(--primary))" strokeWidth={2} name="Routines" />
-              <Line type="monotone" dataKey="habitCompletion" stroke="hsl(var(--success))" strokeWidth={2} name="Habits" />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Category Performance */}
-        <Card className="card-glow">
+      {isVisible("progress-over-time") && (
+        <Card className="card-glow relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-destructive/20 z-10"
+            onClick={() => removeCard("progress-over-time")}
+          >
+            <X className="h-3 w-3 text-destructive" />
+          </Button>
           <CardHeader>
-            <CardTitle>Category Performance</CardTitle>
+            <CardTitle>Progress Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={categoryData}>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="category" />
+                <XAxis dataKey="dateFormatted" />
                 <YAxis />
                 <Tooltip
                   contentStyle={{
@@ -231,47 +227,114 @@ export default function Analytics() {
                     borderRadius: '8px'
                   }}
                 />
-                <Bar dataKey="percentage" fill="hsl(var(--primary))" radius={4} />
-              </BarChart>
+                <Line type="monotone" dataKey="routineCompletion" stroke="hsl(var(--routine-daily))" strokeWidth={2} name="Routines" />
+                <Line type="monotone" dataKey="habitCompletion" stroke="hsl(var(--habit-primary))" strokeWidth={2} name="Habits" />
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Category Performance */}
+        {isVisible("category-performance") && (
+          <Card className="card-glow relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-destructive/20 z-10"
+              onClick={() => removeCard("category-performance")}
+            >
+              <X className="h-3 w-3 text-destructive" />
+            </Button>
+            <CardHeader>
+              <CardTitle>Category Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={categoryData}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="category" />
+                  <YAxis />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar dataKey="percentage" fill="hsl(var(--routine-daily))" radius={4} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Habit Streaks */}
-        <Card className="card-glow">
-          <CardHeader>
-            <CardTitle>Current Streaks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {streakData.slice(0, 5).map((habit, index) => (
-                <div key={habit.name} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                  <span className="font-medium">{habit.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">{habit.streak} days</span>
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: habit.color }}
-                    />
+        {isVisible("habit-streaks") && (
+          <Card className="card-glow relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-destructive/20 z-10"
+              onClick={() => removeCard("habit-streaks")}
+            >
+              <X className="h-3 w-3 text-destructive" />
+            </Button>
+            <CardHeader>
+              <CardTitle>Current Streaks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {streakData.slice(0, 5).map((habit, index) => (
+                  <div key={habit.name} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+                    <span className="font-medium">{habit.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">{habit.streak} days</span>
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: habit.color }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-              {streakData.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No habits to track yet. Add some habits to see your streaks!
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+                {streakData.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No habits to track yet. Add some habits to see your streaks!
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Mood Grid */}
-      <MoodGrid />
+      {isVisible("mood-grid") && (
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-destructive/20 z-10"
+            onClick={() => removeCard("mood-grid")}
+          >
+            <X className="h-3 w-3 text-destructive" />
+          </Button>
+          <MoodGrid />
+        </div>
+      )}
 
       {/* Mood Trends Chart */}
-      {Object.keys(moods).length > 0 && (
-        <Card className="card-glow">
+      {isVisible("mood-trends") && Object.keys(moods).length > 0 && (
+        <Card className="card-glow relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-destructive/20 z-10"
+            onClick={() => removeCard("mood-trends")}
+          >
+            <X className="h-3 w-3 text-destructive" />
+          </Button>
           <CardHeader>
             <CardTitle>Mood Trends Over Time</CardTitle>
           </CardHeader>

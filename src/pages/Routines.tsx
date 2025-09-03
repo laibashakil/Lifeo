@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useRoutines } from "@/hooks/useSupabaseData";
+import RoutineBoxView from "@/components/RoutineBoxView";
+import { Grid, List, Trash2 } from "lucide-react";
 import type { Category, DayKey } from "@/types/lifeo";
 
 const days: DayKey[] = [
@@ -17,6 +19,7 @@ export default function Routines() {
   const { toast } = useToast();
   const { routines, addTask, removeTask } = useRoutines();
   const [currentDay, setCurrentDay] = useState<DayKey>(days[new Date().getDay() === 0 ? 6 : new Date().getDay()-1]);
+  const [viewMode, setViewMode] = useState<"list" | "box">("list");
 
   const totalCount = useMemo(() => {
     const d = routines[currentDay];
@@ -54,8 +57,13 @@ export default function Routines() {
           {tasks.map((t)=> (
             <li key={t.id} className="flex items-center justify-between p-3 rounded-md bg-card card-glow animate-slide-up">
               <span>{t.title}</span>
-              <Button variant="secondary" onClick={()=>removeTask(currentDay, category, t.id)}>
-                Remove
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={()=>removeTask(currentDay, category, t.id)}
+                className="hover:bg-destructive/20"
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </li>
           ))}
@@ -71,34 +79,57 @@ export default function Routines() {
 
   return (
     <section aria-labelledby="routines-title" className="space-y-4 animate-fade-in">
-      <h1 id="routines-title" className="text-3xl font-semibold">Routine Templates</h1>
-      <Card className="card-glow">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <CardTitle className="text-xl">Customize by day</CardTitle>
-          <div className="flex items-center gap-2">
-            <Select value={currentDay} onValueChange={(v)=>setCurrentDay(v as DayKey)}>
-              <SelectTrigger className="w-40"><SelectValue placeholder="Select day"/></SelectTrigger>
-              <SelectContent>
-                {days.map(d=> <SelectItem key={d} value={d}>{d[0].toUpperCase()+d.slice(1)}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={copyToAllDays}>Copy to all days</Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="morning">
-            <TabsList>
-              <TabsTrigger value="morning">Morning</TabsTrigger>
-              <TabsTrigger value="daily">Daily</TabsTrigger>
-              <TabsTrigger value="evening">Evening</TabsTrigger>
-            </TabsList>
-            <TabsContent value="morning"><DayEditor category="morning"/></TabsContent>
-            <TabsContent value="daily"><DayEditor category="daily"/></TabsContent>
-            <TabsContent value="evening"><DayEditor category="evening"/></TabsContent>
-          </Tabs>
-          <p className="mt-4 text-sm text-muted-foreground">Total tasks for {currentDay}: {totalCount}</p>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-between">
+        <h1 id="routines-title" className="text-3xl font-semibold">Routine Templates</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={viewMode === "list" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "box" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("box")}
+          >
+            <Grid className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {viewMode === "box" ? (
+        <RoutineBoxView />
+      ) : (
+        <Card className="card-glow">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardTitle className="text-xl">Customize by day</CardTitle>
+            <div className="flex items-center gap-2">
+              <Select value={currentDay} onValueChange={(v)=>setCurrentDay(v as DayKey)}>
+                <SelectTrigger className="w-40"><SelectValue placeholder="Select day"/></SelectTrigger>
+                <SelectContent>
+                  {days.map(d=> <SelectItem key={d} value={d}>{d[0].toUpperCase()+d.slice(1)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={copyToAllDays}>Copy to all days</Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="morning">
+              <TabsList>
+                <TabsTrigger value="morning">Morning</TabsTrigger>
+                <TabsTrigger value="daily">Daily</TabsTrigger>
+                <TabsTrigger value="evening">Evening</TabsTrigger>
+              </TabsList>
+              <TabsContent value="morning"><DayEditor category="morning"/></TabsContent>
+              <TabsContent value="daily"><DayEditor category="daily"/></TabsContent>
+              <TabsContent value="evening"><DayEditor category="evening"/></TabsContent>
+            </Tabs>
+            <p className="mt-4 text-sm text-muted-foreground">Total tasks for {currentDay}: {totalCount}</p>
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 }
