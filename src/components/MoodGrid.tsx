@@ -112,11 +112,11 @@ export default function MoodGrid() {
   const getSquareSize = () => {
     switch (timeRange) {
       case "month":
-        return "w-8 h-8"; // Larger for month view
+        return "w-6 h-6 sm:w-8 sm:h-8"; // Responsive for month view
       case "quarter":
-        return "w-4 h-4"; // Medium for quarter
+        return "w-3 h-3 sm:w-4 sm:h-4"; // Responsive for quarter
       case "year":
-        return "w-2 h-2"; // Small for year
+        return "w-1.5 h-1.5 sm:w-2 sm:h-2"; // Responsive for year
     }
   };
 
@@ -140,38 +140,38 @@ export default function MoodGrid() {
   return (
     <Card className="card-glow">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <CardTitle>Mood Calendar</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Mood Calendar</CardTitle>
             <InfoTooltip content="You can change the color theme of the grid in the settings!" />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
-              <SelectTrigger className="w-28">
+              <SelectTrigger className="w-24 sm:w-28 text-xs sm:text-sm">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border z-50">
                 <SelectItem value="month">Month</SelectItem>
                 <SelectItem value="quarter">Quarter</SelectItem>
                 <SelectItem value="year">Year</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex gap-1">
-              <Button variant="outline" size="sm" onClick={() => navigate('prev')}>
-                <ChevronLeft className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={() => navigate('prev')} className="h-8 w-8 p-0 sm:h-9 sm:w-9">
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('next')}>
-                <ChevronRight className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={() => navigate('next')} className="h-8 w-8 p-0 sm:h-9 sm:w-9">
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{getTitle()}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
+          <span className="font-medium">{getTitle()}</span>
           <span>Avg: {moodStats.average}/5 ({moodStats.total} entries)</span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         {/* Week labels for month view */}
         {timeRange === "month" && (
           <div className="grid grid-cols-7 gap-1 text-xs text-muted-foreground text-center">
@@ -200,7 +200,7 @@ export default function MoodGrid() {
               title={`${date}${mood !== undefined ? ` - Mood: ${['😞','🙁','😐','🙂','😄'][mood]}` : ' - No mood recorded'}`}
             >
               {timeRange === "month" && (
-                <div className="w-full h-full flex items-center justify-center text-xs font-medium">
+                <div className="w-full h-full flex items-center justify-center text-[10px] sm:text-xs font-medium">
                   {dayOfMonth}
                 </div>
               )}
@@ -209,14 +209,14 @@ export default function MoodGrid() {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <div className="flex items-center gap-4 text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t">
+          <div className="flex items-center gap-2 sm:gap-4 text-xs">
             <span className="text-muted-foreground">Less</span>
             <div className="flex gap-0">
               {currentTheme.colors.map((color, index) => (
                 <div
                   key={index}
-                  className="w-3 h-3 border-0"
+                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 border-0"
                   style={{ backgroundColor: color }}
                   title={['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][index]}
                 />
@@ -225,21 +225,21 @@ export default function MoodGrid() {
             <span className="text-muted-foreground">More</span>
           </div>
           
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-muted border-0" />
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-muted border-0" />
               <span>No data</span>
             </div>
           </div>
         </div>
 
         {/* Mood Distribution */}
-        <div className="grid grid-cols-5 gap-2 pt-2">
+        <div className="grid grid-cols-5 gap-1 sm:gap-2 pt-2">
           {['😞', '🙁', '😐', '🙂', '😄'].map((emoji, index) => (
             <div key={index} className="text-center">
-              <div className="text-lg mb-1">{emoji}</div>
-              <div className="text-sm font-medium">{moodStats.counts[index as keyof typeof moodStats.counts]}</div>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-sm sm:text-lg mb-1">{emoji}</div>
+              <div className="text-xs sm:text-sm font-medium">{moodStats.counts[index as keyof typeof moodStats.counts]}</div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground">
                 {moodStats.total > 0 
                   ? Math.round((moodStats.counts[index as keyof typeof moodStats.counts] / moodStats.total) * 100)
                   : 0}%

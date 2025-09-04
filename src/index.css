@@ -221,4 +221,57 @@
   .hover-glow:hover {
     box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
   }
+
+  /* Touch-friendly classes */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure minimum touch target size */
+  button, .touch-manipulation {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  @media (max-width: 768px) {
+    /* Better mobile spacing */
+    .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+      margin-top: 1rem;
+    }
+    
+    /* Increase touch targets on mobile */
+    button {
+      min-height: 48px;
+      font-size: 0.875rem;
+    }
+    
+    /* Better mobile typography */
+    h1 {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+    }
+    
+    /* Mobile card padding adjustments */
+    .card {
+      padding: 0.75rem;
+    }
+    
+    /* Better mobile form inputs */
+    input, textarea, select {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
+
+  /* Progressive enhancement for larger screens */
+  @media (min-width: 1024px) {
+    .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+      margin-top: 1.5rem;
+    }
+  }
 }

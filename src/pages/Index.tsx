@@ -51,10 +51,10 @@ const Index = () => {
   const doneHabits = habitCompletions[dateKey] || [];
 
   return (
-    <section aria-labelledby="dashboard-title" className="space-y-6 animate-fade-in">
+    <section aria-labelledby="dashboard-title" className="space-y-4 sm:space-y-6 animate-fade-in">
       <header>
-        <h1 id="dashboard-title" className="text-3xl font-semibold">Today</h1>
-        <p className="text-muted-foreground">{today.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' })}</p>
+        <h1 id="dashboard-title" className="text-2xl sm:text-3xl font-semibold">Today</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">{today.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' })}</p>
       </header>
 
       <Card className="card-glow">
@@ -62,24 +62,25 @@ const Index = () => {
           <CardTitle>Overall Progress</CardTitle>
         </CardHeader>
         <CardContent>
-          <Progress value={pct} className="h-3" aria-label={`Overall ${pct}%`} />
-          <p className="mt-2 text-sm text-muted-foreground">{count}/{total} routine tasks completed</p>
+          <Progress value={pct} className="h-2 sm:h-3" aria-label={`Overall ${pct}%`} />
+          <p className="mt-2 text-xs sm:text-sm text-muted-foreground">{count}/{total} routine tasks completed</p>
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {(["morning","daily","evening"] as const).map((cat) => (
           <Card key={cat} className="card-glow animate-slide-up">
             <CardHeader><CardTitle>{cat[0].toUpperCase()+cat.slice(1)} Routine</CardTitle></CardHeader>
             <CardContent>
               <ul className="space-y-2">
                 {day[cat].map(t => (
-                  <li key={t.id} className="flex items-center gap-3 smooth-transition">
+                  <li key={t.id} className="flex items-center gap-2 sm:gap-3 smooth-transition">
                     <Checkbox 
                       checked={doneIds.includes(t.id)} 
-                      onCheckedChange={()=>toggleCompletion(t.id, dateKey)} 
+                      onCheckedChange={()=>toggleCompletion(t.id, dateKey)}
+                      className="touch-manipulation"
                     />
-                    <span className={doneIds.includes(t.id) ? "line-through text-muted-foreground" : ""}>{t.title}</span>
+                    <span className={`text-sm sm:text-base ${doneIds.includes(t.id) ? "line-through text-muted-foreground" : ""}`}>{t.title}</span>
                   </li>
                 ))}
                 {day[cat].length===0 && (
@@ -100,14 +101,15 @@ const Index = () => {
           <CardContent>
             <ul className="space-y-2">
               {habits.map(habit => (
-                <li key={habit.id} className="flex items-center gap-3 smooth-transition">
+                <li key={habit.id} className="flex items-center gap-2 sm:gap-3 smooth-transition">
                   <Checkbox 
                     checked={doneHabits.includes(habit.id)} 
-                    onCheckedChange={()=>toggleHabitCompletion(habit.id, dateKey)} 
+                    onCheckedChange={()=>toggleHabitCompletion(habit.id, dateKey)}
+                    className="touch-manipulation"
                   />
                   <span className="flex items-center gap-2">
-                    <span>{habit.icon}</span>
-                    <span className={doneHabits.includes(habit.id) ? "line-through text-muted-foreground" : ""}>
+                    <span className="text-base sm:text-lg">{habit.icon}</span>
+                    <span className={`text-sm sm:text-base ${doneHabits.includes(habit.id) ? "line-through text-muted-foreground" : ""}`}>
                       {habit.title}
                     </span>
                   </span>
@@ -118,16 +120,16 @@ const Index = () => {
         </Card>
       )}
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 gap-3 sm:gap-4">
         <Card className="card-glow animate-slide-up">
           <CardHeader><CardTitle>Mood Check-in</CardTitle></CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-1 sm:gap-2 mb-3 flex-wrap">
               {moodsList.map((e, i) => (
                 <button 
                   key={i} 
                   aria-label={`Mood ${i}`} 
-                  className={`text-2xl p-2 rounded-md smooth-transition hover-glow ${
+                  className={`text-xl sm:text-2xl p-2 sm:p-3 rounded-md smooth-transition hover-glow touch-manipulation ${
                     currentMood===i? 'bg-accent':'hover:bg-accent/60'
                   }`} 
                   onClick={()=>handleSetMood(i as 0|1|2|3|4)}
@@ -137,7 +139,7 @@ const Index = () => {
               ))}
             </div>
             <textarea 
-              className="w-full rounded-md border bg-background p-2 smooth-transition" 
+              className="w-full rounded-md border bg-background p-2 sm:p-3 smooth-transition text-sm sm:text-base touch-manipulation" 
               placeholder="Optional notes about your mood today" 
               value={note} 
               onChange={e=>setNote(e.target.value)} 
@@ -150,16 +152,16 @@ const Index = () => {
         <Card className="card-glow animate-slide-up">
           <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">Organize your life and build better habits</p>
+            <div className="space-y-2 sm:space-y-3">
+              <p className="text-xs sm:text-sm text-muted-foreground">Organize your life and build better habits</p>
               <div className="flex flex-col gap-2">
-                <Button asChild className="justify-start">
+                <Button asChild className="justify-start touch-manipulation">
                   <Link to="/routines">📅 Setup routines</Link>
                 </Button>
-                <Button variant="secondary" asChild className="justify-start">
+                <Button variant="secondary" asChild className="justify-start touch-manipulation">
                   <Link to="/habits">🎯 Manage habits</Link>
                 </Button>
-                <Button variant="outline" asChild className="justify-start">
+                <Button variant="outline" asChild className="justify-start touch-manipulation">
                   <Link to="/calendar">📊 View calendar</Link>
                 </Button>
               </div>

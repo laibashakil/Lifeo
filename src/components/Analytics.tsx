@@ -116,14 +116,14 @@ export default function Analytics() {
   }, [dailyData]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold" id="analytics-title">Analytics & Insights</h2>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h2 className="text-xl sm:text-2xl font-semibold" id="analytics-title">Analytics & Insights</h2>
         <Select value={timeRange} onValueChange={(value: "7" | "30" | "90") => setTimeRange(value)}>
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-28 sm:w-32 text-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-background border z-50">
             <SelectItem value="7">7 Days</SelectItem>
             <SelectItem value="30">30 Days</SelectItem>
             <SelectItem value="90">90 Days</SelectItem>
@@ -133,7 +133,7 @@ export default function Analytics() {
 
       {/* Overview Stats */}
       {isVisible("overview-stats") && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="card-glow relative">
             <Button
               variant="ghost"
@@ -143,56 +143,56 @@ export default function Analytics() {
             >
               <X className="h-3 w-3 text-destructive" />
             </Button>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-md bg-primary/10">
-                  <Target className="h-5 w-5 text-primary" />
+                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Avg Routine</p>
-                  <p className="text-2xl font-semibold">{averageStats.routine}%</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Avg Routine</p>
+                  <p className="text-xl sm:text-2xl font-semibold">{averageStats.routine}%</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="card-glow">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-md bg-habit-primary/10">
-                  <TrendingUp className="h-5 w-5 text-habit-primary" />
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-habit-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Avg Habits</p>
-                  <p className="text-2xl font-semibold">{averageStats.habit}%</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Avg Habits</p>
+                  <p className="text-xl sm:text-2xl font-semibold">{averageStats.habit}%</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="card-glow">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-md bg-energy/10">
-                  <Smile className="h-5 w-5 text-energy" />
+                  <Smile className="h-4 w-4 sm:h-5 sm:w-5 text-energy" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Avg Mood</p>
-                  <p className="text-2xl font-semibold">{averageStats.mood}/5</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Avg Mood</p>
+                  <p className="text-xl sm:text-2xl font-semibold">{averageStats.mood}/5</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="card-glow">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-md bg-inspiration/10">
-                  <Calendar className="h-5 w-5 text-inspiration" />
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-inspiration" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Days Tracked</p>
-                  <p className="text-2xl font-semibold">{timeRange}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Days Tracked</p>
+                  <p className="text-xl sm:text-2xl font-semibold">{timeRange}</p>
                 </div>
               </div>
             </CardContent>
@@ -215,7 +215,7 @@ export default function Analytics() {
             <CardTitle>Progress Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
               <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="dateFormatted" />
@@ -235,7 +235,7 @@ export default function Analytics() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Category Performance */}
         {isVisible("category-performance") && (
           <Card className="card-glow relative">
@@ -251,7 +251,7 @@ export default function Analytics() {
               <CardTitle>Category Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={200} className="sm:h-[250px]">
                 <BarChart data={categoryData}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis dataKey="category" />
@@ -287,12 +287,12 @@ export default function Analytics() {
             <CardContent>
               <div className="space-y-3">
                 {streakData.slice(0, 5).map((habit, index) => (
-                  <div key={habit.name} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <span className="font-medium">{habit.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">{habit.streak} days</span>
+                  <div key={habit.name} className="flex items-center justify-between p-2 sm:p-3 rounded-md bg-muted/50">
+                    <span className="font-medium text-sm sm:text-base truncate flex-1 mr-2">{habit.name}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-xs sm:text-sm text-muted-foreground">{habit.streak} days</span>
                       <div 
-                        className="w-3 h-3 rounded-full" 
+                        className="w-3 h-3 rounded-full flex-shrink-0" 
                         style={{ backgroundColor: habit.color }}
                       />
                     </div>
@@ -339,7 +339,7 @@ export default function Analytics() {
             <CardTitle>Mood Trends Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={180} className="sm:h-[200px]">
               <LineChart data={dailyData.filter(d => d.mood !== null)}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="dateFormatted" />
