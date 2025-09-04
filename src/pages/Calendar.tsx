@@ -79,14 +79,14 @@ function CalendarView() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3 sm:mb-4">
+        <div className="grid grid-cols-7 gap-2 mb-4">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="text-center text-xs sm:text-sm font-medium text-muted-foreground p-1 sm:p-2">
-              {day.slice(0, 3)}
+            <div key={day} className="text-center text-sm font-medium text-muted-foreground p-2">
+              {day}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
+        <div className="grid grid-cols-7 gap-2">
           {calendarDays.map((date, index) => {
             const dayData = getDayData(date);
             const isCurrentMonthDay = isCurrentMonth(date);
@@ -96,12 +96,12 @@ function CalendarView() {
               <div
                 key={index}
                 className={`
-                  relative p-1 sm:p-2 rounded-md border min-h-[60px] sm:min-h-[80px] smooth-transition
+                  relative p-2 rounded-md border min-h-[80px] smooth-transition
                   ${isCurrentMonthDay ? 'bg-card hover:bg-accent/30' : 'bg-muted/30 text-muted-foreground'}
                   ${todayClass}
                 `}
               >
-                <div className="text-xs sm:text-sm font-medium mb-1">{date.getDate()}</div>
+                <div className="text-sm font-medium mb-1">{date.getDate()}</div>
                 
                 {isCurrentMonthDay && (
                   <div className="space-y-1">
@@ -134,9 +134,9 @@ function CalendarView() {
                     
                     {/* Completion Summary */}
                     {(dayData.completedTasks > 0 || dayData.completedHabits > 0) && (
-                      <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                        {dayData.completedTasks > 0 && <div className="truncate">{dayData.completedTasks}/{dayData.totalTasks}</div>}
-                        {dayData.completedHabits > 0 && <div className="truncate">{dayData.completedHabits}h</div>}
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {dayData.completedTasks > 0 && <div>{dayData.completedTasks}/{dayData.totalTasks} tasks</div>}
+                        {dayData.completedHabits > 0 && <div>{dayData.completedHabits} habits</div>}
                       </div>
                     )}
                   </div>
@@ -147,7 +147,7 @@ function CalendarView() {
         </div>
         
         {/* Legend */}
-        <div className="flex items-center gap-3 sm:gap-6 mt-4 pt-4 border-t text-xs sm:text-sm flex-wrap">
+        <div className="flex items-center gap-6 mt-4 pt-4 border-t text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-1.5 bg-primary rounded-full" />
             <span className="text-muted-foreground">Routine Tasks</span>
@@ -180,9 +180,9 @@ export default function CalendarPage() {
   };
 
   return (
-    <section aria-labelledby="calendar-title" className="space-y-4 sm:space-y-6 animate-fade-in">
+    <section aria-labelledby="calendar-title" className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 id="calendar-title" className="text-2xl sm:text-3xl font-semibold">Calendar & Analytics</h1>
+        <h1 id="calendar-title" className="text-3xl font-semibold">Calendar & Analytics</h1>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
