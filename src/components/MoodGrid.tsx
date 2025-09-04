@@ -94,10 +94,18 @@ export default function MoodGrid() {
     switch (timeRange) {
       case "month":
         return "grid-cols-7"; // Week layout
-      case "quarter":
-        return "grid-cols-12"; // ~7-8 days per column
-      case "year":
-        return "grid-cols-26"; // ~2 weeks per column
+      case "quarter": {
+        // Calculate optimal columns for quarter (aim for roughly square grid)
+        const dataLength = gridData.length;
+        const cols = Math.ceil(Math.sqrt(dataLength * 1.2)); // Slightly wider rectangle
+        return `grid-cols-[repeat(${Math.min(cols, 15)},minmax(0,1fr))]`;
+      }
+      case "year": {
+        // Calculate optimal columns for year (aim for wide rectangle)
+        const dataLength = gridData.length;
+        const cols = Math.ceil(dataLength / 12); // Roughly 12 rows
+        return `grid-cols-[repeat(${Math.min(cols, 31)},minmax(0,1fr))]`;
+      }
     }
   };
 
