@@ -17,7 +17,7 @@ export default function Analytics() {
   const { habits, completions: habitCompletions } = useHabits();
   const { moods } = useMoods();
   const [timeRange, setTimeRange] = useState<"7" | "30" | "90">("30");
-  const { isVisible, removeCard } = useAnalyticsSettings();
+  const { isVisible, removeCard, settings } = useAnalyticsSettings();
 
   // Generate date range
   const dateRange = useMemo(() => {
@@ -75,6 +75,39 @@ export default function Analytics() {
 
   // Category completion data
   const categoryData = useMemo(() => {
+    const { settings } = useAnalyticsSettings();
+    
+    if (settings.combineTaskCategories) {
+      // Combined view - show all tasks together
+      let totalTasks = 0;
+      let totalCompleted = 0;
+      
+      dateRange.forEach(date => {
+        const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof typeof routines;
+        const dayRoutines = routines[dayOfWeek];
+        const dateCompletions = completions[date] || [];
+        
+        Object.values(dayRoutines).forEach(tasks => {
+          totalTasks += tasks.length;
+          totalCompleted += tasks.filter(task => dateCompletions.includes(task.id)).length;
+        });
+        
+        if (settings.combineWithHabits) {
+          const habitCompletionsForDate = habitCompletions[date] || [];
+          totalTasks += habits.length;
+          totalCompleted += habitCompletionsForDate.length;
+        }
+      });
+      
+      return [{
+        category: settings.combineWithHabits ? 'All Tasks & Habits' : 'All Tasks',
+        completed: totalCompleted,
+        total: totalTasks,
+        percentage: totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0
+      }];
+    }
+    
+    // Separate view
     const categories = { morning: 0, daily: 0, evening: 0 };
     const categoryTotals = { morning: 0, daily: 0, evening: 0 };
 
@@ -90,7 +123,7 @@ export default function Analytics() {
       });
     });
 
-    return Object.entries(categories).map(([category, completed]) => ({
+    let result = Object.entries(categories).map(([category, completed]) => ({
       category: category.charAt(0).toUpperCase() + category.slice(1),
       completed,
       total: categoryTotals[category as keyof typeof categoryTotals],
@@ -98,7 +131,28 @@ export default function Analytics() {
         ? Math.round((completed / categoryTotals[category as keyof typeof categoryTotals]) * 100) 
         : 0
     }));
-  }, [dateRange, routines, completions]);
+    
+    // Add habits if combining with habits
+    if (settings.combineWithHabits) {
+      let habitTotal = 0;
+      let habitCompleted = 0;
+      
+      dateRange.forEach(date => {
+        const habitCompletionsForDate = habitCompletions[date] || [];
+        habitTotal += habits.length;
+        habitCompleted += habitCompletionsForDate.length;
+      });
+      
+      result.push({
+        category: 'Habits',
+        completed: habitCompleted,
+        total: habitTotal,
+        percentage: habitTotal > 0 ? Math.round((habitCompleted / habitTotal) * 100) : 0
+      });
+    }
+    
+    return result;
+  }, [dateRange, routines, completions, habits, habitCompletions]);
 
   // Average stats
   const averageStats = useMemo(() => {

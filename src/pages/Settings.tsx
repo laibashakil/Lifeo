@@ -9,13 +9,14 @@ import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useMoodTheme } from "@/hooks/useMoodTheme";
-import { useAnalyticsSettings } from "@/hooks/useAnalyticsSettings";
+import { useAnalyticsSettings, useAppSettings } from "@/hooks/useAnalyticsSettings";
 import { DownloadIcon, UploadIcon, Palette, Shield, Database, BarChart3 } from "lucide-react";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
   const { currentTheme, setTheme, themes } = useMoodTheme();
   const { settings, toggleCard, updateSetting } = useAnalyticsSettings();
+  const { appSettings, updateAppSetting } = useAppSettings();
   const { toast } = useToast();
   const [darkMode, setDarkMode] = useState(false);
 
@@ -92,6 +93,35 @@ export default function Settings() {
                 <p className="text-sm text-muted-foreground">
                   Preview how different color themes look in your mood calendar
                 </p>
+              </div>
+              
+              <div className="space-y-4 pt-6 border-t">
+                <h3 className="font-medium">Page Visibility</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="show-habits">Show Habits Page</Label>
+                      <p className="text-sm text-muted-foreground">Display the habits page in navigation</p>
+                    </div>
+                    <Switch 
+                      id="show-habits"
+                      checked={appSettings.showHabitsPage}
+                      onCheckedChange={(checked) => updateAppSetting('showHabitsPage', checked)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="show-goals">Show Goals Page</Label>
+                      <p className="text-sm text-muted-foreground">Display the goals page in navigation</p>
+                    </div>
+                    <Switch 
+                      id="show-goals"
+                      checked={appSettings.showGoalsPage}
+                      onCheckedChange={(checked) => updateAppSetting('showGoalsPage', checked)}
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

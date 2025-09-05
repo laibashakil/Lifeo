@@ -15,6 +15,11 @@ export interface AnalyticsSettings {
   combineWithHabits: boolean;
 }
 
+export interface AppSettings {
+  showHabitsPage: boolean;
+  showGoalsPage: boolean;
+}
+
 const defaultSettings: AnalyticsSettings = {
   visibleCards: [
     "overview-stats",
@@ -28,11 +33,23 @@ const defaultSettings: AnalyticsSettings = {
   combineWithHabits: false
 };
 
+const defaultAppSettings: AppSettings = {
+  showHabitsPage: true,
+  showGoalsPage: true,
+};
+
 export function useAnalyticsSettings() {
   const [settings, setSettings] = useLocalStorage<AnalyticsSettings>(
     "analytics-settings", 
     defaultSettings
   );
+
+  const updateSetting = (key: keyof Omit<AnalyticsSettings, 'visibleCards'>, value: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
   const toggleCard = (cardId: AnalyticsCard) => {
     setSettings(prev => ({
@@ -54,18 +71,30 @@ export function useAnalyticsSettings() {
     return settings.visibleCards.includes(cardId);
   };
 
-  const updateSetting = (key: keyof Omit<AnalyticsSettings, 'visibleCards'>, value: boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  };
-
   return {
     settings,
     toggleCard,
     removeCard,
     isVisible,
     updateSetting
+  };
+}
+
+export function useAppSettings() {
+  const [appSettings, setAppSettings] = useLocalStorage<AppSettings>(
+    "app-settings",
+    defaultAppSettings
+  );
+
+  const updateAppSetting = (key: keyof AppSettings, value: boolean) => {
+    setAppSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  return {
+    appSettings,
+    updateAppSetting
   };
 }

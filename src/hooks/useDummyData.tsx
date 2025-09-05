@@ -26,6 +26,16 @@ export function useDummyData() {
       if (!existingRoutines?.length && !existingHabits?.length) {
         console.log('Creating dummy data...');
 
+        // Check if dummy data creation is already in progress
+        const isDummyDataCreating = localStorage.getItem('dummy-data-creating');
+        if (isDummyDataCreating) {
+          console.log('Dummy data creation already in progress, skipping...');
+          return;
+        }
+        
+        // Mark dummy data creation as in progress
+        localStorage.setItem('dummy-data-creating', 'true');
+
         // Create routine templates
         const routineTemplates = [
           // Monday
@@ -69,19 +79,20 @@ export function useDummyData() {
           { day_of_week: 'sunday' as const, category: 'evening' as const, title: 'Prepare for Monday', user_id: user.id },
         ];
 
-        await supabase.from('routine_templates').insert(routineTemplates);
+        try {
+          await supabase.from('routine_templates').insert(routineTemplates);
 
-        // Create habits
-        const habits = [
-          { title: 'Drink 8 glasses of water', icon: '💧', color: '#3B82F6', user_id: user.id },
-          { title: 'Take vitamins', icon: '💊', color: '#10B981', user_id: user.id },
-          { title: 'Practice gratitude', icon: '🙏', color: '#F59E0B', user_id: user.id },
-          { title: 'Get 7+ hours sleep', icon: '😴', color: '#8B5CF6', user_id: user.id },
-          { title: 'No social media before noon', icon: '📱', color: '#EF4444', user_id: user.id },
-          { title: 'Read 20 pages', icon: '📚', color: '#06B6D4', user_id: user.id },
-        ];
+          // Create habits
+          const habits = [
+            { title: 'Drink 8 glasses of water', icon: '💧', color: '#3B82F6', user_id: user.id },
+            { title: 'Take vitamins', icon: '💊', color: '#10B981', user_id: user.id },
+            { title: 'Practice gratitude', icon: '🙏', color: '#F59E0B', user_id: user.id },
+            { title: 'Get 7+ hours sleep', icon: '😴', color: '#8B5CF6', user_id: user.id },
+            { title: 'No social media before noon', icon: '📱', color: '#EF4444', user_id: user.id },
+            { title: 'Read 20 pages', icon: '📚', color: '#06B6D4', user_id: user.id },
+          ];
 
-        await supabase.from('habits').insert(habits);
+          await supabase.from('habits').insert(habits);
 
         // Create historical completions and mood entries
         const today = new Date();
@@ -172,10 +183,24 @@ export function useDummyData() {
           }
 
           console.log('Dummy data created successfully!');
+          
+          // Clear the dummy data creation flag
+          localStorage.removeItem('dummy-data-creating');
         }
+        } catch (error) {
+          console.error('Error inserting dummy data:', error);
+          localStorage.removeItem('dummy-data-creating');
+          throw error;
+        }
+      } else {
+        console.log('Dummy data already exists, skipping creation...');
       }
     };
 
-    createDummyData().catch(console.error);
+    createDummyData().catch((error) => {
+      console.error('Error creating dummy data:', error);
+      // Clear the dummy data creation flag on error
+      localStorage.removeItem('dummy-data-creating');
+    });
   }, [user]);
 }

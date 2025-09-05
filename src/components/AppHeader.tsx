@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAppSettings } from "@/hooks/useAnalyticsSettings";
 
 export default function AppHeader() {
   const { user, signOut } = useAuth();
+  const { appSettings } = useAppSettings();
   
   const linkCls = ({ isActive }: { isActive: boolean }) =>
     `px-3 py-2 rounded-md transition-colors ${
@@ -22,7 +24,8 @@ export default function AppHeader() {
           <nav className="flex items-center gap-1" aria-label="Primary">
             <NavLink to="/" end className={linkCls}>Dashboard</NavLink>
             <NavLink to="/routines" className={linkCls}>Routines</NavLink>
-            <NavLink to="/habits" className={linkCls}>Habits</NavLink>
+            {appSettings.showHabitsPage && <NavLink to="/habits" className={linkCls}>Habits</NavLink>}
+            {appSettings.showGoalsPage && <NavLink to="/goals" className={linkCls}>Goals</NavLink>}
             <NavLink to="/calendar" className={linkCls}>Calendar</NavLink>
             <NavLink to="/settings" className={linkCls}>Settings</NavLink>
           </nav>

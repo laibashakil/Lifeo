@@ -32,6 +32,7 @@ const App = () => (
 import AppHeader from "./components/AppHeader";
 import Routines from "./pages/Routines";
 import Habits from "./pages/Habits";
+import Goals from "./pages/Goals";
 import CalendarPage from "./pages/Calendar";
 import Settings from "./pages/Settings";
 
@@ -46,6 +47,7 @@ function AppLayout() {
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/routines" element={<ProtectedRoute><Routines /></ProtectedRoute>} />
           <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />
+          <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
           <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
