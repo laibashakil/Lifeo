@@ -6,6 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits } from "@/hooks/useSupabaseData";
 import { todayKey } from "@/utils/date";
+import { HabitIcon } from "@/components/HabitIcon";
+import { Flame } from "lucide-react";
 
 export default function Habits() {
   const { toast } = useToast();
@@ -73,7 +75,7 @@ export default function Habits() {
                     onCheckedChange={()=>toggleHabitCompletion(h.id, today)} 
                   />
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{h.icon}</span>
+                    <HabitIcon iconName={h.icon} className="h-5 w-5" />
                     <span className={doneToday.includes(h.id) ? "line-through text-muted-foreground" : ""}>
                       {h.title}
                     </span>
@@ -85,8 +87,8 @@ export default function Habits() {
                       {streaks[h.id] || 0} day streak
                     </div>
                     {streaks[h.id] > 0 && (
-                      <div className="text-xs text-muted-foreground">
-                        Keep it up! 🔥
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        Keep it up! <Flame className="h-3 w-3 text-orange-500" />
                       </div>
                     )}
                   </div>
@@ -105,7 +107,7 @@ export default function Habits() {
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-2">No habits yet</p>
                 <p className="text-sm text-muted-foreground">
-                  Start building better habits by adding your first one above! 🎯
+                  Start building better habits by adding your first one above!
                 </p>
               </div>
             )}

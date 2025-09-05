@@ -227,7 +227,7 @@ export function useHabits() {
         const mappedHabits: Habit[] = data.map(h => ({
           id: h.id,
           title: h.title,
-          icon: h.icon || '⭐',
+          icon: h.icon || 'star',
           color: h.color || '#3B82F6',
           active: h.is_active
         }));
@@ -283,7 +283,7 @@ export function useHabits() {
       const habit: Habit = {
         id: data.id,
         title: data.title,
-        icon: data.icon || '⭐',
+        icon: data.icon || 'star',
         color: data.color || '#3B82F6',
         active: true
       };

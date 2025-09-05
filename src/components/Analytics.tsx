@@ -405,7 +405,7 @@ export default function Analytics() {
                     borderRadius: '8px'
                   }}
                   formatter={(value) => {
-                    const moods = ['😞', '🙁', '😐', '🙂', '😄'];
+                    const moods = ['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'];
                     return [moods[Number(value) - 1], 'Mood'];
                   }}
                 />

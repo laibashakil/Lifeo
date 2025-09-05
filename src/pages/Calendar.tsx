@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { DownloadIcon, UploadIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { DownloadIcon, UploadIcon, ChevronLeft, ChevronRight, Angry, Frown, Meh, Smile, Laugh } from "lucide-react";
 import Analytics from "@/components/Analytics";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoutines, useHabits, useMoods } from "@/hooks/useSupabaseData";
@@ -50,9 +50,9 @@ function CalendarView() {
     const habitRate = habits.length > 0 ? (completedHabits / habits.length) : 0;
     
     const mood = moods[dateKey]?.level;
-    const moodEmoji = mood !== undefined ? ['😞','🙁','😐','🙂','😄'][mood] : null;
+    const moodIcon = mood !== undefined ? [Angry, Frown, Meh, Smile, Laugh][mood] : null;
 
-    return { completionRate, habitRate, moodEmoji, totalTasks, completedTasks, completedHabits };
+    return { completionRate, habitRate, moodIcon, totalTasks, completedTasks, completedHabits };
   };
 
   const isCurrentMonth = (date: Date) => date.getMonth() === currentMonth;
@@ -125,10 +125,10 @@ function CalendarView() {
                       </div>
                     )}
                     
-                    {/* Mood Emoji */}
-                    {dayData.moodEmoji && (
-                      <div className="absolute top-1 right-1 text-xs">
-                        {dayData.moodEmoji}
+                    {/* Mood Icon */}
+                    {dayData.moodIcon && (
+                      <div className="absolute top-1 right-1">
+                        <dayData.moodIcon className="h-3 w-3" />
                       </div>
                     )}
                     
@@ -157,7 +157,7 @@ function CalendarView() {
             <span className="text-muted-foreground">Habits</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm">😄</span>
+            <Smile className="h-3 w-3" />
             <span className="text-muted-foreground">Mood</span>
           </div>
         </div>

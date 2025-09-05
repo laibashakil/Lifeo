@@ -8,6 +8,8 @@ import { useDummyData } from "@/hooks/useDummyData";
 import { todayKey, weekdayKey } from "@/utils/date";
 import type { DayKey } from "@/types/lifeo";
 import { Link } from "react-router-dom";
+import { Angry, Frown, Meh, Smile, Laugh, Calendar, Target, BarChart3 } from "lucide-react";
+import { HabitIcon } from "@/components/HabitIcon";
 
 const Index = () => {
   useDummyData(); // Initialize dummy data
@@ -36,7 +38,8 @@ const Index = () => {
   const count = useMemo(() => doneIds.length, [doneIds]);
   const pct = total ? Math.round((count / total) * 100) : 0;
 
-  const moodsList = ["😞","🙁","😐","🙂","😄"] as const;
+  const moodIcons = [Angry, Frown, Meh, Smile, Laugh] as const;
+  const moodLabels = ["Very Bad", "Bad", "Neutral", "Good", "Very Good"] as const;
   const currentMood = moods[dateKey]?.level;
 
   function handleSetMood(level: 0|1|2|3|4) {
@@ -106,7 +109,7 @@ const Index = () => {
                     onCheckedChange={()=>toggleHabitCompletion(habit.id, dateKey)} 
                   />
                   <span className="flex items-center gap-2">
-                    <span>{habit.icon}</span>
+                    <HabitIcon iconName={habit.icon} className="h-4 w-4" />
                     <span className={doneHabits.includes(habit.id) ? "line-through text-muted-foreground" : ""}>
                       {habit.title}
                     </span>
@@ -123,16 +126,16 @@ const Index = () => {
           <CardHeader><CardTitle>Mood Check-in</CardTitle></CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 mb-3">
-              {moodsList.map((e, i) => (
+              {moodIcons.map((Icon, i) => (
                 <button 
                   key={i} 
-                  aria-label={`Mood ${i}`} 
-                  className={`text-2xl p-2 rounded-md smooth-transition hover-glow ${
+                  aria-label={`Mood ${moodLabels[i]}`} 
+                  className={`p-3 rounded-md smooth-transition hover-glow ${
                     currentMood===i? 'bg-accent':'hover:bg-accent/60'
                   }`} 
                   onClick={()=>handleSetMood(i as 0|1|2|3|4)}
                 >
-                  {e}
+                  <Icon className="h-6 w-6" />
                 </button>
               ))}
             </div>
@@ -154,13 +157,22 @@ const Index = () => {
               <p className="text-sm text-muted-foreground">Organize your life and build better habits</p>
               <div className="flex flex-col gap-2">
                 <Button asChild className="justify-start">
-                  <Link to="/routines">📅 Setup routines</Link>
+                  <Link to="/routines">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Setup routines
+                  </Link>
                 </Button>
                 <Button variant="secondary" asChild className="justify-start">
-                  <Link to="/habits">🎯 Manage habits</Link>
+                  <Link to="/habits">
+                    <Target className="h-4 w-4 mr-2" />
+                    Manage habits
+                  </Link>
                 </Button>
                 <Button variant="outline" asChild className="justify-start">
-                  <Link to="/calendar">📊 View calendar</Link>
+                  <Link to="/calendar">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    View calendar
+                  </Link>
                 </Button>
               </div>
             </div>

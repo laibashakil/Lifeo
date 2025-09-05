@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useMoods } from "@/hooks/useSupabaseData";
 import { useMoodTheme } from "@/hooks/useMoodTheme";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Frown, Meh, Smile, Laugh, Angry } from "lucide-react";
 
 type TimeRange = "month" | "quarter" | "year";
 
@@ -91,20 +91,19 @@ export default function MoodGrid() {
   };
 
   const getGridCols = () => {
+    const dataLength = gridData.length;
     switch (timeRange) {
       case "month":
         return "grid-cols-7"; // Week layout
       case "quarter": {
-        // Calculate optimal columns for quarter (aim for roughly square grid)
-        const dataLength = gridData.length;
-        const cols = Math.ceil(Math.sqrt(dataLength * 1.2)); // Slightly wider rectangle
-        return `grid-cols-[repeat(${Math.min(cols, 15)},minmax(0,1fr))]`;
+        // Create rectangular grid - aim for ~15 columns for quarters
+        const cols = Math.min(Math.ceil(dataLength / 6), 15);
+        return `grid-cols-${cols}`;
       }
       case "year": {
-        // Calculate optimal columns for year (aim for wide rectangle)
-        const dataLength = gridData.length;
-        const cols = Math.ceil(dataLength / 12); // Roughly 12 rows
-        return `grid-cols-[repeat(${Math.min(cols, 31)},minmax(0,1fr))]`;
+        // Create rectangular grid - aim for ~30 columns for years
+        const cols = Math.min(Math.ceil(dataLength / 12), 31);
+        return `grid-cols-${cols}`;
       }
     }
   };
@@ -114,7 +113,7 @@ export default function MoodGrid() {
       case "month":
         return "w-8 h-8"; // Larger for month view
       case "quarter":
-        return "w-4 h-4"; // Medium for quarter
+        return "w-3 h-3"; // Medium for quarter
       case "year":
         return "w-2 h-2"; // Small for year
     }
@@ -182,7 +181,7 @@ export default function MoodGrid() {
         )}
 
         {/* Mood Grid */}
-        <div className={`inline-grid ${getGridCols()}`}>
+        <div className={`grid ${getGridCols()} gap-1 max-w-full place-content-center`}>
           {gridData.map(({ date, mood, isToday, dayOfMonth }, index) => (
             <div
               key={date}
@@ -197,7 +196,7 @@ export default function MoodGrid() {
               style={{
                 backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'hsl(var(--muted))'
               }}
-              title={`${date}${mood !== undefined ? ` - Mood: ${['😞','🙁','😐','🙂','😄'][mood]}` : ' - No mood recorded'}`}
+              title={`${date}${mood !== undefined ? ` - Mood: ${['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][mood]}` : ' - No mood recorded'}`}
             >
               {timeRange === "month" && (
                 <div className="w-full h-full flex items-center justify-center text-xs font-medium">
@@ -235,9 +234,17 @@ export default function MoodGrid() {
 
         {/* Mood Distribution */}
         <div className="grid grid-cols-5 gap-2 pt-2">
-          {['😞', '🙁', '😐', '🙂', '😄'].map((emoji, index) => (
+          {[
+            { icon: Angry, label: 'Very Bad' },
+            { icon: Frown, label: 'Bad' },
+            { icon: Meh, label: 'Neutral' },
+            { icon: Smile, label: 'Good' },
+            { icon: Laugh, label: 'Very Good' }
+          ].map(({ icon: Icon, label }, index) => (
             <div key={index} className="text-center">
-              <div className="text-lg mb-1">{emoji}</div>
+              <div className="flex justify-center mb-1">
+                <Icon className="h-5 w-5" style={{ color: currentTheme.colors[index] }} />
+              </div>
               <div className="text-sm font-medium">{moodStats.counts[index as keyof typeof moodStats.counts]}</div>
               <div className="text-xs text-muted-foreground">
                 {moodStats.total > 0 

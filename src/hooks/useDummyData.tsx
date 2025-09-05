@@ -84,12 +84,12 @@ export function useDummyData() {
 
           // Create habits
           const habits = [
-            { title: 'Drink 8 glasses of water', icon: '💧', color: '#3B82F6', user_id: user.id },
-            { title: 'Take vitamins', icon: '💊', color: '#10B981', user_id: user.id },
-            { title: 'Practice gratitude', icon: '🙏', color: '#F59E0B', user_id: user.id },
-            { title: 'Get 7+ hours sleep', icon: '😴', color: '#8B5CF6', user_id: user.id },
-            { title: 'No social media before noon', icon: '📱', color: '#EF4444', user_id: user.id },
-            { title: 'Read 20 pages', icon: '📚', color: '#06B6D4', user_id: user.id },
+            { title: 'Drink 8 glasses of water', icon: 'droplets', color: '#3B82F6', user_id: user.id },
+            { title: 'Take vitamins', icon: 'pill', color: '#10B981', user_id: user.id },
+            { title: 'Practice gratitude', icon: 'heart', color: '#F59E0B', user_id: user.id },
+            { title: 'Get 7+ hours sleep', icon: 'moon', color: '#8B5CF6', user_id: user.id },
+            { title: 'No social media before noon', icon: 'smartphone', color: '#EF4444', user_id: user.id },
+            { title: 'Read 20 pages', icon: 'book-open', color: '#06B6D4', user_id: user.id },
           ];
 
           await supabase.from('habits').insert(habits);
