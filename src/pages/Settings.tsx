@@ -10,13 +10,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useMoodTheme } from "@/hooks/useMoodTheme";
 import { useAnalyticsSettings, useAppSettings } from "@/hooks/useAnalyticsSettings";
-import { DownloadIcon, UploadIcon, Palette, Shield, Database, BarChart3 } from "lucide-react";
+import { useFontSettings } from "@/hooks/useFontSettings";
+import { DownloadIcon, UploadIcon, Palette, Shield, Database, BarChart3, Type } from "lucide-react";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
   const { currentTheme, setTheme, themes } = useMoodTheme();
   const { settings, toggleCard, updateSetting } = useAnalyticsSettings();
   const { appSettings, updateAppSetting } = useAppSettings();
+  const { fontOptions, currentFont, setFont } = useFontSettings();
   const { toast } = useToast();
   const [darkMode, setDarkMode] = useState(false);
 
@@ -60,6 +62,34 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
                 </div>
                 <Switch id="dark-mode" checked={darkMode} onCheckedChange={setDarkMode} />
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Label>Font Family</Label>
+                  <InfoTooltip content="Choose your preferred font for better readability" />
+                </div>
+                <Select value={currentFont} onValueChange={setFont}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontOptions.map((font) => (
+                      <SelectItem key={font.id} value={font.id}>
+                        <div className="flex items-center gap-3">
+                          <Type className="h-4 w-4" />
+                          <div>
+                            <span className="font-medium">{font.name}</span>
+                            <span className="text-sm text-muted-foreground ml-2">{font.description}</span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  Choose from professional, readable fonts optimized for productivity
+                </p>
               </div>
               
               <div className="space-y-3">

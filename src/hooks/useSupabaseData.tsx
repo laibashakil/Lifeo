@@ -55,7 +55,16 @@ export function useRoutines() {
         .order('sort_order');
 
       if (templates) {
-        const newRoutines = { ...routines };
+        const newRoutines: RoutineState = {
+          monday: { morning: [], daily: [], evening: [] },
+          tuesday: { morning: [], daily: [], evening: [] },
+          wednesday: { morning: [], daily: [], evening: [] },
+          thursday: { morning: [], daily: [], evening: [] },
+          friday: { morning: [], daily: [], evening: [] },
+          saturday: { morning: [], daily: [], evening: [] },
+          sunday: { morning: [], daily: [], evening: [] },
+        };
+        
         templates.forEach((template) => {
           const dayKey = dayKeyMap[template.day_of_week];
           const category = categoryMap[template.category];
@@ -67,7 +76,11 @@ export function useRoutines() {
               active: template.is_active,
               sort: template.sort_order || 0
             };
-            newRoutines[dayKey][category].push(task);
+            // Check for duplicates before adding
+            const exists = newRoutines[dayKey][category].some(t => t.id === task.id);
+            if (!exists) {
+              newRoutines[dayKey][category].push(task);
+            }
           }
         });
         setRoutines(newRoutines);

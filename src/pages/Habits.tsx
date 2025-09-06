@@ -33,6 +33,7 @@ export default function Habits() {
     try {
       await addHabit(title.trim());
       setTitle("");
+      setIsValid(false);
       toast({ title: "Habit added", description: "Your new habit has been added successfully!" });
     } catch (error) {
       toast({ 

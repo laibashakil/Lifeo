@@ -29,7 +29,7 @@ export type RoutineState = Record<DayKey, DayRoutine>;
 export interface Habit {
   id: string;
   title: string;
-  icon?: string; // emoji
+  icon?: string; // icon name for lucide-react
   color?: string; // token name or hex, UI only
   active: boolean;
 }

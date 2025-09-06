@@ -18,6 +18,7 @@ export interface AnalyticsSettings {
 export interface AppSettings {
   showHabitsPage: boolean;
   showGoalsPage: boolean;
+  fontFamily: string;
 }
 
 const defaultSettings: AnalyticsSettings = {
@@ -36,6 +37,7 @@ const defaultSettings: AnalyticsSettings = {
 const defaultAppSettings: AppSettings = {
   showHabitsPage: true,
   showGoalsPage: true,
+  fontFamily: 'inter',
 };
 
 export function useAnalyticsSettings() {
@@ -86,7 +88,10 @@ export function useAppSettings() {
     defaultAppSettings
   );
 
-  const updateAppSetting = (key: keyof AppSettings, value: boolean) => {
+  const updateAppSetting = <K extends keyof AppSettings>(
+    key: K,
+    value: AppSettings[K]
+  ): void => {
     setAppSettings(prev => ({
       ...prev,
       [key]: value

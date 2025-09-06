@@ -18,6 +18,13 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'inter': ['Inter', 'system-ui', 'sans-serif'],
+				'poppins': ['Poppins', 'system-ui', 'sans-serif'],
+				'source': ['Source Sans Pro', 'system-ui', 'sans-serif'],
+				'lato': ['Lato', 'system-ui', 'sans-serif'],
+				'opensans': ['Open Sans', 'system-ui', 'sans-serif'],
+			},
 			gridTemplateColumns: {
 				'8': 'repeat(8, minmax(0, 1fr))',
 				'9': 'repeat(9, minmax(0, 1fr))',
