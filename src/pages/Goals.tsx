@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ValidatedInput } from "@/components/ui/validated-input";
+import { ValidationRules, globalRateLimiter } from "@/utils/validation";
 import { Calendar, Plus, Target, Trash2, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -72,18 +73,47 @@ export default function Goals() {
     goalId: ''
   });
 
+  const [goalTitleValid, setGoalTitleValid] = useState(false);
+  const [subTaskTitleValid, setSubTaskTitleValid] = useState(false);
+
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
   const [isAddSubTaskOpen, setIsAddSubTaskOpen] = useState(false);
 
   const addGoal = () => {
-    if (!newGoal.title.trim() || !newGoal.targetDate) {
-      toast({ title: "Error", description: "Please fill in all required fields." });
+    if (!newGoal.title.trim() || !newGoal.targetDate || !goalTitleValid) {
+      toast({ 
+        title: "Error", 
+        description: "Please fill in all required fields with valid data.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Rate limiting check
+    if (!globalRateLimiter.isAllowed('add-goal', 5, 60000)) {
+      toast({ 
+        title: "Too many requests", 
+        description: "Please wait before adding more goals.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate target date is in the future
+    const targetDate = new Date(newGoal.targetDate);
+    const now = new Date();
+    if (targetDate <= now) {
+      toast({ 
+        title: "Invalid date", 
+        description: "Target date must be in the future.",
+        variant: "destructive"
+      });
       return;
     }
 
     const goal: Goal = {
       id: Date.now().toString(),
-      title: newGoal.title,
+      title: newGoal.title.trim(),
       type: newGoal.type,
       targetDate: newGoal.targetDate,
       completed: false,
@@ -92,6 +122,7 @@ export default function Goals() {
 
     setGoals(prev => [...prev, goal]);
     setNewGoal({ title: '', type: 'monthly', targetDate: '' });
+    setGoalTitleValid(false);
     setIsAddGoalOpen(false);
     
     toast({ 
@@ -101,14 +132,28 @@ export default function Goals() {
   };
 
   const addSubTask = () => {
-    if (!newSubTask.title.trim() || !newSubTask.goalId || newSubTask.daysOfWeek.length === 0) {
-      toast({ title: "Error", description: "Please fill in all fields and select at least one day." });
+    if (!newSubTask.title.trim() || !newSubTask.goalId || newSubTask.daysOfWeek.length === 0 || !subTaskTitleValid) {
+      toast({ 
+        title: "Error", 
+        description: "Please fill in all fields with valid data and select at least one day.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Rate limiting check
+    if (!globalRateLimiter.isAllowed('add-subtask', 10, 60000)) {
+      toast({ 
+        title: "Too many requests", 
+        description: "Please wait before adding more sub-tasks.",
+        variant: "destructive"
+      });
       return;
     }
 
     const subTask: SubTask = {
       id: Date.now().toString(),
-      title: newSubTask.title,
+      title: newSubTask.title.trim(),
       daysOfWeek: newSubTask.daysOfWeek
     };
 
@@ -119,6 +164,7 @@ export default function Goals() {
     ));
 
     setNewSubTask({ title: '', daysOfWeek: [], goalId: '' });
+    setSubTaskTitleValid(false);
     setIsAddSubTaskOpen(false);
 
     toast({ 
@@ -228,10 +274,14 @@ export default function Goals() {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="subtask-title">Sub-task Title</Label>
-                    <Input
+                    <ValidatedInput
                       id="subtask-title"
                       value={newSubTask.title}
-                      onChange={(e) => setNewSubTask(prev => ({ ...prev, title: e.target.value }))}
+                      validationRules={ValidationRules.taskTitle}
+                      onValueChange={(value, valid) => {
+                        setNewSubTask(prev => ({ ...prev, title: value }));
+                        setSubTaskTitleValid(valid);
+                      }}
                       placeholder="e.g., Practice driving"
                     />
                   </div>
@@ -251,7 +301,13 @@ export default function Goals() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={addSubTask} className="flex-1">Add Sub-task</Button>
+                    <Button 
+                      onClick={addSubTask} 
+                      className="flex-1"
+                      disabled={!subTaskTitleValid || newSubTask.daysOfWeek.length === 0}
+                    >
+                      Add Sub-task
+                    </Button>
                     <Button variant="outline" onClick={() => setIsAddSubTaskOpen(false)}>
                       Cancel
                     </Button>
@@ -318,10 +374,14 @@ export default function Goals() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="goal-title">Goal Title</Label>
-                <Input
+                <ValidatedInput
                   id="goal-title"
                   value={newGoal.title}
-                  onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
+                  validationRules={ValidationRules.goalTitle}
+                  onValueChange={(value, valid) => {
+                    setNewGoal(prev => ({ ...prev, title: value }));
+                    setGoalTitleValid(valid);
+                  }}
                   placeholder="e.g., Get driver's license"
                 />
               </div>
@@ -340,15 +400,22 @@ export default function Goals() {
               </div>
               <div>
                 <Label htmlFor="target-date">Target Date</Label>
-                <Input
+                <input
                   id="target-date"
                   type="date"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   value={newGoal.targetDate}
                   onChange={(e) => setNewGoal(prev => ({ ...prev, targetDate: e.target.value }))}
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={addGoal} className="flex-1">Create Goal</Button>
+                <Button 
+                  onClick={addGoal} 
+                  className="flex-1"
+                  disabled={!goalTitleValid || !newGoal.targetDate.trim()}
+                >
+                  Create Goal
+                </Button>
                 <Button variant="outline" onClick={() => setIsAddGoalOpen(false)}>
                   Cancel
                 </Button>

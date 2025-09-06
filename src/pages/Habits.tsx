@@ -1,25 +1,46 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useHabits } from "@/hooks/useSupabaseData";
 import { todayKey } from "@/utils/date";
 import { HabitIcon } from "@/components/HabitIcon";
+import { ValidatedInput } from "@/components/ui/validated-input";
+import { ValidationRules, globalRateLimiter } from "@/utils/validation";
 import { Flame } from "lucide-react";
 
 export default function Habits() {
   const { toast } = useToast();
   const { habits, completions, addHabit, removeHabit, toggleHabitCompletion } = useHabits();
   const [title, setTitle] = useState("");
+  const [isValid, setIsValid] = useState(false);
   const today = todayKey();
 
   async function handleAddHabit() {
-    if (!title.trim()) return;
-    await addHabit(title.trim());
-    setTitle("");
-    toast({ title: "Habit added", description: "Your new habit has been added successfully!" });
+    if (!title.trim() || !isValid) return;
+    
+    // Rate limiting check
+    if (!globalRateLimiter.isAllowed('add-habit', 10, 60000)) {
+      toast({ 
+        title: "Too many requests", 
+        description: "Please wait before adding more habits.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      await addHabit(title.trim());
+      setTitle("");
+      toast({ title: "Habit added", description: "Your new habit has been added successfully!" });
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: "Failed to add habit. Please try again.",
+        variant: "destructive"
+      });
+    }
   }
 
   const doneToday = completions[today] || [];
@@ -51,13 +72,19 @@ export default function Habits() {
           <CardTitle>Add New Habit</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-2">
-          <Input 
+          <ValidatedInput 
             placeholder="e.g., Read 10 minutes, Exercise, Meditate" 
             value={title} 
-            onChange={e=>setTitle(e.target.value)}
-            onKeyDown={(e)=>{ if(e.key==='Enter') handleAddHabit(); }} 
+            validationRules={ValidationRules.habitTitle}
+            onValueChange={(value, valid) => {
+              setTitle(value);
+              setIsValid(valid);
+            }}
+            onKeyDown={(e)=>{ if(e.key==='Enter' && isValid) handleAddHabit(); }} 
           />
-          <Button onClick={handleAddHabit}>Add</Button>
+          <Button onClick={handleAddHabit} disabled={!isValid || !title.trim()}>
+            Add
+          </Button>
         </CardContent>
       </Card>
 

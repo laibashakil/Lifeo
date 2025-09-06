@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useRoutines } from "@/hooks/useSupabaseData";
 import RoutineBoxView from "@/components/RoutineBoxView";
+import { ValidatedInput } from "@/components/ui/validated-input";
+import { ValidationRules, globalRateLimiter } from "@/utils/validation";
 import { Grid, List, Trash2 } from "lucide-react";
 import type { Category, DayKey } from "@/types/lifeo";
 
@@ -33,24 +34,50 @@ export default function Routines() {
 
   const DayEditor = ({ category }: { category: Category }) => {
     const [newTitle, setNewTitle] = useState("");
+    const [isValid, setIsValid] = useState(false);
     const tasks = routines[currentDay][category];
     
     const handleAddTask = async () => {
-      if (!newTitle.trim()) return;
-      await addTask(currentDay, category, newTitle.trim());
-      setNewTitle("");
+      if (!newTitle.trim() || !isValid) return;
+      
+      // Rate limiting check
+      if (!globalRateLimiter.isAllowed('add-task', 15, 60000)) {
+        toast({ 
+          title: "Too many requests", 
+          description: "Please wait before adding more tasks.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      try {
+        await addTask(currentDay, category, newTitle.trim());
+        setNewTitle("");
+      } catch (error) {
+        toast({ 
+          title: "Error", 
+          description: "Failed to add task. Please try again.",
+          variant: "destructive"
+        });
+      }
     };
 
     return (
       <div className="space-y-4 animate-fade-in">
         <div className="flex gap-2">
-          <Input 
+          <ValidatedInput 
             placeholder={`Add ${category} task`} 
             value={newTitle} 
-            onChange={e=>setNewTitle(e.target.value)}
-            onKeyDown={(e)=>{ if(e.key==='Enter') handleAddTask(); }} 
+            validationRules={ValidationRules.taskTitle}
+            onValueChange={(value, valid) => {
+              setNewTitle(value);
+              setIsValid(valid);
+            }}
+            onKeyDown={(e)=>{ if(e.key==='Enter' && isValid) handleAddTask(); }} 
           />
-          <Button onClick={handleAddTask}>Add</Button>
+          <Button onClick={handleAddTask} disabled={!isValid || !newTitle.trim()}>
+            Add
+          </Button>
         </div>
         <Separator />
         <ul className="space-y-2">
