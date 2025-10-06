@@ -90,34 +90,44 @@ export default function MoodGrid() {
     }
   };
 
-  const getGridCols = () => {
+  const getGridLayout = () => {
     const dataLength = gridData.length;
+    
     switch (timeRange) {
-      case "month":
-        return "grid-cols-7"; // Week layout
+      case "month": {
+        // 7 columns (week layout), calculate rows needed
+        const rows = Math.ceil(dataLength / 7);
+        return {
+          cols: 7,
+          cellSize: "w-12 h-12",
+          gap: "gap-2",
+          rounded: "rounded-lg"
+        };
+      }
       case "quarter": {
-        // Create rectangular grid - aim for ~15 columns for quarters
-        const cols = Math.min(Math.ceil(dataLength / 6), 15);
-        return `grid-cols-${cols}`;
+        // Aim for ~13 columns for aesthetic rectangular shape
+        const cols = 13;
+        return {
+          cols,
+          cellSize: "w-5 h-5",
+          gap: "gap-1.5",
+          rounded: "rounded-md"
+        };
       }
       case "year": {
-        // Create rectangular grid - aim for ~30 columns for years
-        const cols = Math.min(Math.ceil(dataLength / 12), 31);
-        return `grid-cols-${cols}`;
+        // Aim for ~26 columns for balanced rectangular year view
+        const cols = 26;
+        return {
+          cols,
+          cellSize: "w-3 h-3",
+          gap: "gap-1",
+          rounded: "rounded"
+        };
       }
     }
   };
 
-  const getSquareSize = () => {
-    switch (timeRange) {
-      case "month":
-        return "w-8 h-8"; // Larger for month view
-      case "quarter":
-        return "w-3 h-3"; // Medium for quarter
-      case "year":
-        return "w-2 h-2"; // Small for year
-    }
-  };
+  const layout = getGridLayout();
 
   const moodStats = useMemo(() => {
     const total = gridData.filter(d => d.mood !== undefined).length;
@@ -180,31 +190,40 @@ export default function MoodGrid() {
           </div>
         )}
 
-        {/* Mood Grid */}
-        <div className={`grid ${getGridCols()} gap-1 max-w-full place-content-center`}>
-          {gridData.map(({ date, mood, isToday, dayOfMonth }, index) => (
-            <div
-              key={date}
-              className={`
-                ${getSquareSize()} transition-all duration-200 cursor-pointer border-0
-                ${isToday ? 'ring-2 ring-primary ring-offset-1' : ''}
-                ${mood !== undefined 
-                  ? 'hover:scale-110 hover:z-10 relative' 
-                  : 'hover:opacity-70'
-                }
-              `}
-              style={{
-                backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'hsl(var(--muted))'
-              }}
-              title={`${date}${mood !== undefined ? ` - Mood: ${['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][mood]}` : ' - No mood recorded'}`}
-            >
-              {timeRange === "month" && (
-                <div className="w-full h-full flex items-center justify-center text-xs font-medium">
-                  {dayOfMonth}
-                </div>
-              )}
-            </div>
-          ))}
+        {/* Mood Grid - Consistent height container */}
+        <div className="min-h-[380px] flex items-center justify-center">
+          <div 
+            className={`grid ${layout.gap}`}
+            style={{
+              gridTemplateColumns: `repeat(${layout.cols}, minmax(0, 1fr))`,
+              maxWidth: '100%'
+            }}
+          >
+            {gridData.map(({ date, mood, isToday, dayOfMonth }, index) => (
+              <div
+                key={date}
+                className={`
+                  ${layout.cellSize} ${layout.rounded}
+                  transition-all duration-300 cursor-pointer
+                  ${isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
+                  ${mood !== undefined 
+                    ? 'hover:scale-125 hover:shadow-lg hover:z-10 relative shadow-sm' 
+                    : 'hover:opacity-70'
+                  }
+                `}
+                style={{
+                  backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'hsl(var(--muted)/0.5)'
+                }}
+                title={`${date}${mood !== undefined ? ` - Mood: ${['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][mood]}` : ' - No mood recorded'}`}
+              >
+                {timeRange === "month" && (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-semibold">
+                    {dayOfMonth}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Legend */}
