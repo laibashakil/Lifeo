@@ -95,33 +95,35 @@ export default function MoodGrid() {
     
     switch (timeRange) {
       case "month": {
-        // 7 columns (week layout), calculate rows needed
-        const rows = Math.ceil(dataLength / 7);
+        // Compact rectangular layout - 7 columns for weeks
         return {
           cols: 7,
-          cellSize: "w-12 h-12",
-          gap: "gap-2",
-          rounded: "rounded-lg"
+          cellSize: "w-6 h-6",
+          gap: "gap-1.5",
+          rounded: "rounded",
+          showDayLabels: true
         };
       }
       case "quarter": {
-        // Aim for ~13 columns for aesthetic rectangular shape
-        const cols = 13;
+        // Compact rectangular layout - ~14 columns
+        const cols = 14;
         return {
           cols,
-          cellSize: "w-5 h-5",
-          gap: "gap-1.5",
-          rounded: "rounded-md"
+          cellSize: "w-4 h-4",
+          gap: "gap-1",
+          rounded: "rounded",
+          showDayLabels: false
         };
       }
       case "year": {
-        // Aim for ~26 columns for balanced rectangular year view
+        // Ultra-compact rectangular layout - ~26 columns
         const cols = 26;
         return {
           cols,
           cellSize: "w-3 h-3",
           gap: "gap-1",
-          rounded: "rounded"
+          rounded: "rounded",
+          showDayLabels: false
         };
       }
     }
@@ -183,20 +185,20 @@ export default function MoodGrid() {
       <CardContent className="space-y-4">
         {/* Week labels for month view */}
         {timeRange === "month" && (
-          <div className="grid grid-cols-7 gap-1 text-xs text-muted-foreground text-center">
+          <div className="grid grid-cols-7 gap-1.5 text-[10px] text-muted-foreground text-center font-medium max-w-[500px] mx-auto px-4">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="py-1">{day}</div>
+              <div key={day} className="py-0.5">{day}</div>
             ))}
           </div>
         )}
 
         {/* Mood Grid - Consistent height container */}
-        <div className="min-h-[380px] flex items-center justify-center">
+        <div className="min-h-[360px] flex items-center justify-center p-4">
           <div 
-            className={`grid ${layout.gap}`}
+            className={`grid ${layout.gap} w-full`}
             style={{
               gridTemplateColumns: `repeat(${layout.cols}, minmax(0, 1fr))`,
-              maxWidth: '100%'
+              maxWidth: timeRange === 'month' ? '500px' : timeRange === 'quarter' ? '600px' : '700px'
             }}
           >
             {gridData.map(({ date, mood, isToday, dayOfMonth }, index) => (
@@ -204,20 +206,20 @@ export default function MoodGrid() {
                 key={date}
                 className={`
                   ${layout.cellSize} ${layout.rounded}
-                  transition-all duration-300 cursor-pointer
-                  ${isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
+                  transition-all duration-200 cursor-pointer
+                  ${isToday ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}
                   ${mood !== undefined 
-                    ? 'hover:scale-125 hover:shadow-lg hover:z-10 relative shadow-sm' 
-                    : 'hover:opacity-70'
+                    ? 'hover:scale-150 hover:shadow-xl hover:z-10 relative' 
+                    : 'hover:opacity-60'
                   }
                 `}
                 style={{
-                  backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'hsl(var(--muted)/0.5)'
+                  backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'hsl(var(--muted)/0.4)'
                 }}
                 title={`${date}${mood !== undefined ? ` - Mood: ${['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][mood]}` : ' - No mood recorded'}`}
               >
-                {timeRange === "month" && (
-                  <div className="w-full h-full flex items-center justify-center text-xs font-semibold">
+                {layout.showDayLabels && timeRange === "month" && (
+                  <div className="w-full h-full flex items-center justify-center text-[9px] font-bold opacity-70">
                     {dayOfMonth}
                   </div>
                 )}
