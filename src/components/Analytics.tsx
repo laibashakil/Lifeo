@@ -75,8 +75,6 @@ export default function Analytics() {
 
   // Category completion data
   const categoryData = useMemo(() => {
-    const { settings } = useAnalyticsSettings();
-    
     if (settings.combineTaskCategories) {
       // Combined view - show all tasks together
       let totalTasks = 0;
@@ -152,7 +150,7 @@ export default function Analytics() {
     }
     
     return result;
-  }, [dateRange, routines, completions, habits, habitCompletions]);
+  }, [dateRange, routines, completions, habits, habitCompletions, settings]);
 
   // Average stats
   const averageStats = useMemo(() => {
