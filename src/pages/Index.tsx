@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useRoutines, useHabits, useMoods } from "@/hooks/useSupabaseData";
 import { useDummyData } from "@/hooks/useDummyData";
+import { useAnalyticsSettings } from "@/hooks/useAnalyticsSettings";
 import { todayKey, weekdayKey } from "@/utils/date";
 import type { DayKey } from "@/types/lifeo";
 import { Link } from "react-router-dom";
@@ -16,6 +17,7 @@ const Index = () => {
   const { routines, completions, toggleCompletion } = useRoutines();
   const { habits, completions: habitCompletions, toggleHabitCompletion } = useHabits();
   const { moods, setMood } = useMoods();
+  const { settings } = useAnalyticsSettings();
   const [note, setNote] = useState("");
   
   const today = new Date();
@@ -34,9 +36,14 @@ const Index = () => {
   const day = routines[dayKey];
   const total = day.morning.length + day.daily.length + day.evening.length;
   const doneIds = completions[dateKey] || [];
+  const doneHabits = habitCompletions[dateKey] || [];
 
   const count = useMemo(() => doneIds.length, [doneIds]);
-  const pct = total ? Math.round((count / total) * 100) : 0;
+  
+  // Calculate total and completed including habits if combined
+  const totalItems = settings.combineWithHabits ? total + habits.length : total;
+  const completedItems = settings.combineWithHabits ? count + doneHabits.length : count;
+  const pct = totalItems ? Math.round((completedItems / totalItems) * 100) : 0;
 
   const moodIcons = [Angry, Frown, Meh, Smile, Laugh] as const;
   const moodLabels = ["Very Bad", "Bad", "Neutral", "Good", "Very Good"] as const;
@@ -51,8 +58,6 @@ const Index = () => {
     setMood(dateKey, currentMoodEntry?.level ?? 2, note);
   }
 
-  const doneHabits = habitCompletions[dateKey] || [];
-
   return (
     <section aria-labelledby="dashboard-title" className="space-y-6 animate-fade-in">
       <header>
@@ -66,59 +71,149 @@ const Index = () => {
         </CardHeader>
         <CardContent>
           <Progress value={pct} className="h-3" aria-label={`Overall ${pct}%`} />
-          <p className="mt-2 text-sm text-muted-foreground">{count}/{total} routine tasks completed</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {completedItems}/{totalItems} {settings.combineWithHabits ? 'tasks & habits' : 'routine tasks'} completed
+          </p>
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-3 gap-4">
-        {(["morning","daily","evening"] as const).map((cat) => (
-          <Card key={cat} className="card-glow animate-slide-up">
-            <CardHeader><CardTitle>{cat[0].toUpperCase()+cat.slice(1)} Routine</CardTitle></CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {day[cat].map(t => (
-                  <li key={t.id} className="flex items-center gap-3 smooth-transition">
-                    <Checkbox 
-                      checked={doneIds.includes(t.id)} 
-                      onCheckedChange={()=>toggleCompletion(t.id, dateKey)} 
-                    />
-                    <span className={doneIds.includes(t.id) ? "line-through text-muted-foreground" : ""}>{t.title}</span>
-                  </li>
-                ))}
-                {day[cat].length===0 && (
-                  <p className="text-sm text-muted-foreground">
-                    No tasks yet. <Link to="/routines" className="text-primary hover:underline">Add some tasks</Link>
-                  </p>
-                )}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Habits Section */}
-      {habits.length > 0 && (
+      {settings.combineTaskCategories ? (
+        // Combined view - all tasks in one card
         <Card className="card-glow animate-slide-up">
-          <CardHeader><CardTitle>Today's Habits</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Today's Tasks{settings.combineWithHabits && ' & Habits'}</CardTitle></CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {habits.map(habit => (
-                <li key={habit.id} className="flex items-center gap-3 smooth-transition">
-                  <Checkbox 
-                    checked={doneHabits.includes(habit.id)} 
-                    onCheckedChange={()=>toggleHabitCompletion(habit.id, dateKey)} 
-                  />
-                  <span className="flex items-center gap-2">
-                    <HabitIcon iconName={habit.icon} className="h-4 w-4" />
-                    <span className={doneHabits.includes(habit.id) ? "line-through text-muted-foreground" : ""}>
-                      {habit.title}
-                    </span>
-                  </span>
-                </li>
-              ))}
+              {/* Morning tasks */}
+              {day.morning.length > 0 && (
+                <>
+                  <li className="text-sm font-semibold text-muted-foreground pt-2">Morning</li>
+                  {day.morning.map(t => (
+                    <li key={t.id} className="flex items-center gap-3 smooth-transition pl-2">
+                      <Checkbox 
+                        checked={doneIds.includes(t.id)} 
+                        onCheckedChange={()=>toggleCompletion(t.id, dateKey)} 
+                      />
+                      <span className={doneIds.includes(t.id) ? "line-through text-muted-foreground" : ""}>{t.title}</span>
+                    </li>
+                  ))}
+                </>
+              )}
+              
+              {/* Daily tasks */}
+              {day.daily.length > 0 && (
+                <>
+                  <li className="text-sm font-semibold text-muted-foreground pt-2">Daily</li>
+                  {day.daily.map(t => (
+                    <li key={t.id} className="flex items-center gap-3 smooth-transition pl-2">
+                      <Checkbox 
+                        checked={doneIds.includes(t.id)} 
+                        onCheckedChange={()=>toggleCompletion(t.id, dateKey)} 
+                      />
+                      <span className={doneIds.includes(t.id) ? "line-through text-muted-foreground" : ""}>{t.title}</span>
+                    </li>
+                  ))}
+                </>
+              )}
+              
+              {/* Evening tasks */}
+              {day.evening.length > 0 && (
+                <>
+                  <li className="text-sm font-semibold text-muted-foreground pt-2">Evening</li>
+                  {day.evening.map(t => (
+                    <li key={t.id} className="flex items-center gap-3 smooth-transition pl-2">
+                      <Checkbox 
+                        checked={doneIds.includes(t.id)} 
+                        onCheckedChange={()=>toggleCompletion(t.id, dateKey)} 
+                      />
+                      <span className={doneIds.includes(t.id) ? "line-through text-muted-foreground" : ""}>{t.title}</span>
+                    </li>
+                  ))}
+                </>
+              )}
+              
+              {/* Habits (if combined) */}
+              {settings.combineWithHabits && habits.length > 0 && (
+                <>
+                  <li className="text-sm font-semibold text-muted-foreground pt-2">Habits</li>
+                  {habits.map(habit => (
+                    <li key={habit.id} className="flex items-center gap-3 smooth-transition pl-2">
+                      <Checkbox 
+                        checked={doneHabits.includes(habit.id)} 
+                        onCheckedChange={()=>toggleHabitCompletion(habit.id, dateKey)} 
+                      />
+                      <span className="flex items-center gap-2">
+                        <HabitIcon iconName={habit.icon} className="h-4 w-4" />
+                        <span className={doneHabits.includes(habit.id) ? "line-through text-muted-foreground" : ""}>
+                          {habit.title}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </>
+              )}
+              
+              {total === 0 && (!settings.combineWithHabits || habits.length === 0) && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No tasks yet. <Link to="/routines" className="text-primary hover:underline">Add some tasks</Link>
+                </p>
+              )}
             </ul>
           </CardContent>
         </Card>
+      ) : (
+        // Separate view - tasks by category
+        <>
+          <div className="grid md:grid-cols-3 gap-4">
+            {(["morning","daily","evening"] as const).map((cat) => (
+              <Card key={cat} className="card-glow animate-slide-up">
+                <CardHeader><CardTitle>{cat[0].toUpperCase()+cat.slice(1)} Routine</CardTitle></CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {day[cat].map(t => (
+                      <li key={t.id} className="flex items-center gap-3 smooth-transition">
+                        <Checkbox 
+                          checked={doneIds.includes(t.id)} 
+                          onCheckedChange={()=>toggleCompletion(t.id, dateKey)} 
+                        />
+                        <span className={doneIds.includes(t.id) ? "line-through text-muted-foreground" : ""}>{t.title}</span>
+                      </li>
+                    ))}
+                    {day[cat].length===0 && (
+                      <p className="text-sm text-muted-foreground">
+                        No tasks yet. <Link to="/routines" className="text-primary hover:underline">Add some tasks</Link>
+                      </p>
+                    )}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Habits Section - only show separately if not combined */}
+          {!settings.combineWithHabits && habits.length > 0 && (
+            <Card className="card-glow animate-slide-up">
+              <CardHeader><CardTitle>Today's Habits</CardTitle></CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {habits.map(habit => (
+                    <li key={habit.id} className="flex items-center gap-3 smooth-transition">
+                      <Checkbox 
+                        checked={doneHabits.includes(habit.id)} 
+                        onCheckedChange={()=>toggleHabitCompletion(habit.id, dateKey)} 
+                      />
+                      <span className="flex items-center gap-2">
+                        <HabitIcon iconName={habit.icon} className="h-4 w-4" />
+                        <span className={doneHabits.includes(habit.id) ? "line-through text-muted-foreground" : ""}>
+                          {habit.title}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       <div className="grid md:grid-cols-2 gap-4">
