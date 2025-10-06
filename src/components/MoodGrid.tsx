@@ -91,45 +91,46 @@ export default function MoodGrid() {
   };
 
   const getGridLayout = () => {
-    const dataLength = gridData.length;
-    
     switch (timeRange) {
       case "month": {
-        // Compact rectangular layout - 7 columns for weeks
         return {
           cols: 7,
-          cellSize: "w-6 h-6",
-          gap: "gap-1.5",
-          rounded: "rounded",
-          showDayLabels: true
+          cellSize: "w-16 h-16",
+          iconSize: "h-6 w-6",
+          showDayLabels: true,
+          showDayNumbers: true,
+          useCircles: true
         };
       }
       case "quarter": {
-        // Compact rectangular layout - ~14 columns
-        const cols = 14;
         return {
-          cols,
-          cellSize: "w-4 h-4",
-          gap: "gap-1",
-          rounded: "rounded",
-          showDayLabels: false
+          cols: 14,
+          cellSize: "w-10 h-10",
+          iconSize: "h-4 w-4",
+          showDayLabels: false,
+          showDayNumbers: false,
+          useCircles: true
         };
       }
       case "year": {
-        // Ultra-compact rectangular layout - ~26 columns
-        const cols = 26;
         return {
-          cols,
-          cellSize: "w-3 h-3",
-          gap: "gap-1",
-          rounded: "rounded",
-          showDayLabels: false
+          cols: 26,
+          cellSize: "w-6 h-6",
+          iconSize: "h-3 w-3",
+          showDayLabels: false,
+          showDayNumbers: false,
+          useCircles: false
         };
       }
     }
   };
 
   const layout = getGridLayout();
+  
+  const getMoodIcon = (moodLevel: number) => {
+    const icons = [Angry, Frown, Meh, Smile, Laugh];
+    return icons[moodLevel];
+  };
 
   const moodStats = useMemo(() => {
     const total = gridData.filter(d => d.mood !== undefined).length;
@@ -182,74 +183,94 @@ export default function MoodGrid() {
           <span>Avg: {moodStats.average}/5 ({moodStats.total} entries)</span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {/* Week labels for month view */}
-        {timeRange === "month" && (
-          <div className="grid grid-cols-7 gap-1.5 text-[10px] text-muted-foreground text-center font-medium max-w-[500px] mx-auto px-4">
+        {timeRange === "month" && layout.showDayLabels && (
+          <div className="grid grid-cols-7 gap-2 text-xs text-muted-foreground text-center font-semibold px-1">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="py-0.5">{day}</div>
+              <div key={day} className="py-1">{day}</div>
             ))}
           </div>
         )}
 
-        {/* Mood Grid - Consistent height container */}
-        <div className="min-h-[360px] flex items-center justify-center p-4">
+        {/* Mood Grid - Compact with no excess spacing */}
+        <div className="flex items-center justify-center">
           <div 
-            className={`grid ${layout.gap} w-full`}
+            className={`grid ${timeRange === 'month' ? 'gap-2' : timeRange === 'quarter' ? 'gap-1.5' : 'gap-1'} w-full justify-items-center`}
             style={{
               gridTemplateColumns: `repeat(${layout.cols}, minmax(0, 1fr))`,
-              maxWidth: timeRange === 'month' ? '500px' : timeRange === 'quarter' ? '600px' : '700px'
+              maxWidth: timeRange === 'month' ? '100%' : timeRange === 'quarter' ? '600px' : '700px'
             }}
           >
-            {gridData.map(({ date, mood, isToday, dayOfMonth }, index) => (
-              <div
-                key={date}
-                className={`
-                  ${layout.cellSize} ${layout.rounded}
-                  transition-all duration-200 cursor-pointer
-                  ${isToday ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}
-                  ${mood !== undefined 
-                    ? 'hover:scale-150 hover:shadow-xl hover:z-10 relative' 
-                    : 'hover:opacity-60'
-                  }
-                `}
-                style={{
-                  backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'hsl(var(--muted)/0.4)'
-                }}
-                title={`${date}${mood !== undefined ? ` - Mood: ${['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][mood]}` : ' - No mood recorded'}`}
-              >
-                {layout.showDayLabels && timeRange === "month" && (
-                  <div className="w-full h-full flex items-center justify-center text-[9px] font-bold opacity-70">
-                    {dayOfMonth}
+            {gridData.map(({ date, mood, isToday, dayOfMonth }, index) => {
+              const MoodIcon = mood !== undefined ? getMoodIcon(mood) : null;
+              
+              return (
+                <div
+                  key={date}
+                  className="flex flex-col items-center justify-center gap-1"
+                >
+                  <div
+                    className={`
+                      ${layout.cellSize}
+                      ${layout.useCircles ? 'rounded-full' : 'rounded'}
+                      transition-all duration-200 cursor-pointer
+                      flex items-center justify-center
+                      ${isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
+                      ${mood !== undefined 
+                        ? 'hover:scale-110 hover:shadow-lg hover:z-10 relative' 
+                        : 'hover:opacity-70 border-2 border-dashed border-muted'
+                      }
+                    `}
+                    style={{
+                      backgroundColor: mood !== undefined ? currentTheme.colors[mood] : 'transparent'
+                    }}
+                    title={`${date}${mood !== undefined ? ` - Mood: ${['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][mood]}` : ' - No mood recorded'}`}
+                  >
+                    {MoodIcon ? (
+                      <MoodIcon className={`${layout.iconSize} text-white drop-shadow`} strokeWidth={2.5} />
+                    ) : (
+                      <span className="text-muted-foreground text-lg font-light">+</span>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+                  
+                  {layout.showDayNumbers && (
+                    <div className="text-xs font-medium text-muted-foreground">
+                      {dayOfMonth}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <div className="flex items-center gap-4 text-xs">
-            <span className="text-muted-foreground">Less</span>
-            <div className="flex gap-0">
-              {currentTheme.colors.map((color, index) => (
-                <div
-                  key={index}
-                  className="w-3 h-3 border-0"
-                  style={{ backgroundColor: color }}
-                  title={['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][index]}
-                />
-              ))}
+        <div className="flex items-center justify-between pt-3 border-t">
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-muted-foreground">Moods:</span>
+            <div className="flex gap-1">
+              {currentTheme.colors.map((color, index) => {
+                const Icon = getMoodIcon(index);
+                return (
+                  <div
+                    key={index}
+                    className="w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: color }}
+                    title={['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][index]}
+                  >
+                    <Icon className="h-4 w-4 text-white" strokeWidth={2.5} />
+                  </div>
+                );
+              })}
             </div>
-            <span className="text-muted-foreground">More</span>
           </div>
           
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-muted border-0" />
-              <span>No data</span>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="w-7 h-7 rounded-full border-2 border-dashed border-muted flex items-center justify-center">
+              <span className="text-lg font-light">+</span>
             </div>
+            <span>No data</span>
           </div>
         </div>
 
